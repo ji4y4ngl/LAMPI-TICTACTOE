@@ -9,6 +9,6 @@ Tic Tac Toe game in Kivy UI and command line for Lampis.
 4. Clone the repository: <br>
   <code>git clone git@github.com:ji4y4ngl/LAMPI-TICTACTOE.git</code>
 5. Play the game <br>
-   a. Run the command line tool (directly on the Lampi or while ssh-ed into the Lampi): <br>
+   a. (1 device) Run the command line tool (directly on the Lampi or while ssh-ed into the Lampi): <br>
    &nbsp;&nbsp;&nbsp;&nbsp;<code>python3 toe_cmd.py</code> <br>
-   b. Play Tic Tac Toe on the LCD
+   b. (2 devices) Play Tic Tac Toe on the LCDs
