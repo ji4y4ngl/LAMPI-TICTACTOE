@@ -68,15 +68,15 @@ def single_game(cur_player):
          
         # Try exception block for MOVE input
         try:
-            print(f"{player_choice[cur_player]}'s turn. Which box? : ", end="")
+            print(f"Choose a box, {player_choice[cur_player]}: ", end="")
             move = int(input()) 
         except ValueError:
-            print("Wrong Input!!! Try Again")
+            print("Wrong Input!!! Try Again,")
             continue
  
         # Sanity check for MOVE inout
         if move < 1 or move > 9:
-            print("Wrong Input!!! Try Again")
+            print("Wrong Input!!! Try Again,")
             continue
  
         # Check if the box is not occupied already
@@ -114,12 +114,10 @@ def single_game(cur_player):
  
 if __name__ == "__main__":
  
-    print("Player 1")
-    player1 = input("Enter the name : ")
+    player1 = input("Enter Player 1's name : ")
     print("\n")
  
-    print("Player 2")
-    player2 = input("Enter the name : ")
+    player2 = input("Enter Player 2's name : ")
     print("\n")
      
     # Stores the player who chooses X and O
@@ -140,9 +138,9 @@ if __name__ == "__main__":
     while True:
  
         # Player choice Menu
-        print("Turn to choose for", cur_player)
-        print("Enter 1 for X")
-        print("Enter 2 for O")
+        print(f"Choose what you want to do, {cur_player}.")
+        print("Enter 1 to be X")
+        print("Enter 2 to be O")
         print("Enter 3 to Quit")
  
         # Try exception for CHOICE input
@@ -173,7 +171,7 @@ if __name__ == "__main__":
             break  
  
         else:
-            print("Wrong Choice!!!! Try Again\n")
+            print("Wrong Choice!!!! Try Again.\n")
  
         # Stores the winner in a single game of Tic Tac Toe
         winner = single_game(options[choice-1])
