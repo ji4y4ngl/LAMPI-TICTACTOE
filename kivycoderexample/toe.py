@@ -1,3 +1,5 @@
+# for kivymd: pip3 install --force-reinstall https://github.com/kivymd/KivyMD/archive/master.zip
+# or python3 -m pip install kivymd
 from kivy.lang import Builder
 from kivymd.app import MDApp
 
