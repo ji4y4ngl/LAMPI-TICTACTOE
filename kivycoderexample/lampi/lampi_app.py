@@ -39,16 +39,16 @@ class ToeScreen(Screen):
 	# No Winner
 	def no_winner(self):
 		if self.winner == False and \
-		self.root.ids.btn1.disabled == True and \
-		self.root.ids.btn2.disabled == True and \
-		self.root.ids.btn3.disabled == True and \
-		self.root.ids.btn4.disabled == True and \
-		self.root.ids.btn5.disabled == True and \
-		self.root.ids.btn6.disabled == True and \
-		self.root.ids.btn7.disabled == True and \
-		self.root.ids.btn8.disabled == True and \
-		self.root.ids.btn9.disabled == True:
-			self.root.ids.score.text = "IT'S A TIE!!"
+		self.ids.btn1.disabled == True and \
+		self.ids.btn2.disabled == True and \
+		self.ids.btn3.disabled == True and \
+		self.ids.btn4.disabled == True and \
+		self.ids.btn5.disabled == True and \
+		self.ids.btn6.disabled == True and \
+		self.ids.btn7.disabled == True and \
+		self.ids.btn8.disabled == True and \
+		self.ids.btn9.disabled == True:
+			self.ids.score.text = "IT'S A TIE!!"
 
 	# End The Game
 	def end_game(self, a,b,c):
@@ -61,7 +61,7 @@ class ToeScreen(Screen):
 		self.disable_all_buttons()
 
 		# Set Label for winner
-		self.root.ids.score.text = f"{a.text} Wins!"
+		self.ids.score.text = f"{a.text} Wins!"
 
 		# Keep track of winners and loser
 		if a.text == "X":
@@ -69,46 +69,46 @@ class ToeScreen(Screen):
 		else:
 			self.O_win = self.O_win + 1
 
-		self.root.ids.game.text = f"X Wins: {self.X_win}  |  O Wins: {self.O_win}"
+		self.ids.game.text = f"X Wins: {self.X_win}  |  O Wins: {self.O_win}"
 
 	def disable_all_buttons(self):
 		# Disable The Buttons
-		self.root.ids.btn1.disabled = True
-		self.root.ids.btn2.disabled = True
-		self.root.ids.btn3.disabled = True
-		self.root.ids.btn4.disabled = True
-		self.root.ids.btn5.disabled = True
-		self.root.ids.btn6.disabled = True
-		self.root.ids.btn7.disabled = True
-		self.root.ids.btn8.disabled = True
-		self.root.ids.btn9.disabled = True
+		self.ids.btn1.disabled = True
+		self.ids.btn2.disabled = True
+		self.ids.btn3.disabled = True
+		self.ids.btn4.disabled = True
+		self.ids.btn5.disabled = True
+		self.ids.btn6.disabled = True
+		self.ids.btn7.disabled = True
+		self.ids.btn8.disabled = True
+		self.ids.btn9.disabled = True
 
 	def win(self):
 		# Across
-		if self.root.ids.btn1.text != "" and self.root.ids.btn1.text == self.root.ids.btn2.text and self.root.ids.btn2.text == self.root.ids.btn3.text:
-			self.end_game(self.root.ids.btn1, self.root.ids.btn2, self.root.ids.btn3)
+		if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn2.text and self.ids.btn2.text == self.ids.btn3.text:
+			self.end_game(self.ids.btn1, self.ids.btn2, self.ids.btn3)
 
-		if self.root.ids.btn4.text != "" and self.root.ids.btn4.text == self.root.ids.btn5.text and self.root.ids.btn5.text == self.root.ids.btn6.text:
-			self.end_game(self.root.ids.btn4, self.root.ids.btn5, self.root.ids.btn6)
+		if self.ids.btn4.text != "" and self.ids.btn4.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn6.text:
+			self.end_game(self.ids.btn4, self.ids.btn5, self.ids.btn6)
 
-		if self.root.ids.btn7.text != "" and self.root.ids.btn7.text == self.root.ids.btn8.text and self.root.ids.btn8.text == self.root.ids.btn9.text:
-			self.end_game(self.root.ids.btn7, self.root.ids.btn8, self.root.ids.btn9)
+		if self.ids.btn7.text != "" and self.ids.btn7.text == self.ids.btn8.text and self.ids.btn8.text == self.ids.btn9.text:
+			self.end_game(self.ids.btn7, self.ids.btn8, self.ids.btn9)
 		# Down
-		if self.root.ids.btn1.text != "" and self.root.ids.btn1.text == self.root.ids.btn4.text and self.root.ids.btn4.text == self.root.ids.btn7.text:
-			self.end_game(self.root.ids.btn1, self.root.ids.btn4, self.root.ids.btn7)
+		if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn4.text and self.ids.btn4.text == self.ids.btn7.text:
+			self.end_game(self.ids.btn1, self.ids.btn4, self.ids.btn7)
 
-		if self.root.ids.btn2.text != "" and self.root.ids.btn2.text == self.root.ids.btn5.text and self.root.ids.btn5.text == self.root.ids.btn8.text:
-			self.end_game(self.root.ids.btn2, self.root.ids.btn5, self.root.ids.btn8)
+		if self.ids.btn2.text != "" and self.ids.btn2.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn8.text:
+			self.end_game(self.ids.btn2, self.ids.btn5, self.ids.btn8)
 
-		if self.root.ids.btn3.text != "" and self.root.ids.btn3.text == self.root.ids.btn6.text and self.root.ids.btn6.text == self.root.ids.btn9.text:
-			self.end_game(self.root.ids.btn3, self.root.ids.btn6, self.root.ids.btn9)
+		if self.ids.btn3.text != "" and self.ids.btn3.text == self.ids.btn6.text and self.ids.btn6.text == self.ids.btn9.text:
+			self.end_game(self.ids.btn3, self.ids.btn6, self.ids.btn9)
 
 		# Diagonal 
-		if self.root.ids.btn1.text != "" and self.root.ids.btn1.text == self.root.ids.btn5.text and self.root.ids.btn5.text == self.root.ids.btn9.text:
-			self.end_game(self.root.ids.btn1, self.root.ids.btn5, self.root.ids.btn9)
+		if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn9.text:
+			self.end_game(self.ids.btn1, self.ids.btn5, self.ids.btn9)
 
-		if self.root.ids.btn3.text != "" and self.root.ids.btn3.text == self.root.ids.btn5.text and self.root.ids.btn5.text == self.root.ids.btn7.text:
-			self.end_game(self.root.ids.btn3, self.root.ids.btn5, self.root.ids.btn7)
+		if self.ids.btn3.text != "" and self.ids.btn3.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn7.text:
+			self.end_game(self.ids.btn3, self.ids.btn5, self.ids.btn7)
 
 		self.no_winner()
 
@@ -116,12 +116,12 @@ class ToeScreen(Screen):
 		if self.turn == 'X':
 			btn.text = "X"
 			btn.disabled = True
-			self.root.ids.score.text = "O's Turn!"
+			self.ids.score.text = "O's Turn!"
 			self.turn = "O"
 		else:
 			btn.text = "O"
 			btn.disabled = True
-			self.root.ids.score.text = "X's Turn!"
+			self.ids.score.text = "X's Turn!"
 			self.turn = "X"
 
 		# Check To See if won
@@ -132,40 +132,40 @@ class ToeScreen(Screen):
 		self.turn = "X"
 
 		# Enable The Buttons
-		self.root.ids.btn1.disabled = False
-		self.root.ids.btn2.disabled = False
-		self.root.ids.btn3.disabled = False
-		self.root.ids.btn4.disabled = False
-		self.root.ids.btn5.disabled = False
-		self.root.ids.btn6.disabled = False
-		self.root.ids.btn7.disabled = False
-		self.root.ids.btn8.disabled = False
-		self.root.ids.btn9.disabled = False
+		self.ids.btn1.disabled = False
+		self.ids.btn2.disabled = False
+		self.ids.btn3.disabled = False
+		self.ids.btn4.disabled = False
+		self.ids.btn5.disabled = False
+		self.ids.btn6.disabled = False
+		self.ids.btn7.disabled = False
+		self.ids.btn8.disabled = False
+		self.ids.btn9.disabled = False
 
 		# Clear The Buttons
-		self.root.ids.btn1.text = ""
-		self.root.ids.btn2.text = ""
-		self.root.ids.btn3.text = ""
-		self.root.ids.btn4.text = ""
-		self.root.ids.btn5.text = ""
-		self.root.ids.btn6.text = ""
-		self.root.ids.btn7.text = ""
-		self.root.ids.btn8.text = ""
-		self.root.ids.btn9.text = ""
+		self.ids.btn1.text = ""
+		self.ids.btn2.text = ""
+		self.ids.btn3.text = ""
+		self.ids.btn4.text = ""
+		self.ids.btn5.text = ""
+		self.ids.btn6.text = ""
+		self.ids.btn7.text = ""
+		self.ids.btn8.text = ""
+		self.ids.btn9.text = ""
 
 		# Reset The Button Colors
-		self.root.ids.btn1.color = "green"
-		self.root.ids.btn2.color = "green"
-		self.root.ids.btn3.color = "green"
-		self.root.ids.btn4.color = "green"
-		self.root.ids.btn5.color = "green"
-		self.root.ids.btn6.color = "green"
-		self.root.ids.btn7.color = "green"
-		self.root.ids.btn8.color = "green"
-		self.root.ids.btn9.color = "green"
+		self.ids.btn1.color = "green"
+		self.ids.btn2.color = "green"
+		self.ids.btn3.color = "green"
+		self.ids.btn4.color = "green"
+		self.ids.btn5.color = "green"
+		self.ids.btn6.color = "green"
+		self.ids.btn7.color = "green"
+		self.ids.btn8.color = "green"
+		self.ids.btn9.color = "green"
 
 		# Reset The Score Label
-		self.root.ids.score.text = "X GOES FIRST!"
+		self.ids.score.text = "X GOES FIRST!"
 
 		# Reset The Winner Variable
 		self.winner = False
