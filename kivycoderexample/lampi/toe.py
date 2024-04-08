@@ -1,16 +1,15 @@
-#!/usr/bin/env python3
-
 # for kivymd: pip3 install --force-reinstall https://github.com/kivymd/KivyMD/archive/master.zip
 # or python3 -m pip install kivymd
 from kivy.lang import Builder
-from kivymd.app import MDApp
+# from kivymd.app import MDApp
+from kivy.uix.screenmanager import Screen
 
-class ToeApp(MDApp):
+class ToeScreen(Screen):
 	title = "Tic Tac Toe!"
 	def build(self):
 		self.theme_cls.theme_style = "Dark"
 		self.theme_cls.primary_palette = "BlueGray"
-		return Builder.load_file('toe.kv')
+		return Builder.load_file('lampi/toe.kv')
 		
 	# Define Who's turn it is
 	turn = "X"
@@ -155,5 +154,3 @@ class ToeApp(MDApp):
 
 		# Reset The Winner Variable
 		self.winner = False
-	
-ToeApp().run()

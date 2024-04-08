@@ -1,0 +1,148 @@
+#:kivy 1.9
+#:import hsv_to_rgb colorsys.hsv_to_rgb
+#:import rgb_to_hsv colorsys.rgb_to_hsv
+
+#:include lampi/controls/gradient_slider.kv
+#:include lampi/controls/lampi_toggle.kv
+#:include lampi/controls/color_box.kv
+#:include lampi/colors.kv
+
+<MainScreen>:
+
+  BoxLayout:
+    canvas.before:
+      Color:
+        rgba: offwhite
+      Rectangle:
+        pos: self.pos
+        size: self.size
+    orientation: 'vertical'
+    BoxLayout:
+      orientation: 'vertical'
+      padding: 30
+      size_hint_y: 0.66
+      # hue
+      GradientSlider:
+        id: hue_slider
+        size_hint_y: 0.33
+        colors: red, yellow, green, cyan, blue, magenta, red
+        value: app.hue
+        on_value: app.hue = self.value_normalized
+      # saturation
+      GradientSlider:
+        id: saturation_slider
+        size_hint_y: 0.33
+        colors: white, hsv_to_rgb(app.hue, 1.0, 1.0)
+        value: app.saturation
+        on_value: app.saturation = self.value_normalized
+      # brightness
+      GradientSlider:
+        id: brightness
+        size_hint_y: 0.33
+        colors: (0, 0, 0, 1), (1, 1, 1, 1)
+        thumb_image_light: 'images/brightness_icon_light_small.png'
+        thumb_image_dark: 'images/brightness_icon_dark_small.png'
+        value: app.brightness
+        on_value: app.brightness = self.value_normalized
+    BoxLayout:
+      orientation: 'vertical'
+      size_hint_y: 0.33
+      ColorBox:
+        id: button_hue
+        size_hint_y: 0.1
+        color: hsv_to_rgb(app.hue, app.saturation, 1.0)
+      LampiToggle:
+        id: button_onoff
+        size_hint_y: 0.90
+        image: 'images/power_icon_light.png'
+        accent_color: hsv_to_rgb(hue_slider.value, saturation_slider.value, 1.0)
+        text: ''
+        state: 'down' if app.lamp_is_on else 'normal'
+        on_state:  app.lamp_is_on = True if self.state == 'down' else False
+
+<ToeScreen>:
+  #  #:kivy 1.2.0
+
+  FloatLayout:
+
+    GridLayout:
+      size_hint: .5, .5
+      pos_hint: {'center_x': .5, 'center_y': .7}
+      cols: 3
+      rows: 3
+
+      Button:
+        id: btn1
+        text: ""
+        font_size: "45sp"
+        on_release: root.presser(btn1)
+
+      Button:
+        id: btn2
+        text: ""
+        font_size: "45sp"
+        on_release: root.presser(btn2)
+
+      Button:
+        id: btn3
+        text: ""
+        font_size: "45sp"
+        on_release: root.presser(btn3)
+
+      Button:
+        id: btn4
+        text: ""
+        font_size: "45sp"
+        on_release: root.presser(btn4)
+
+      Button:
+        id: btn5
+        text: ""
+        font_size: "45sp"
+        on_release: root.presser(btn5)
+
+      Button:
+        id: btn6
+        text: ""
+        font_size: "45sp"
+        on_release: root.presser(btn6)
+
+      Button:
+        id: btn7
+        text: ""
+        font_size: "45sp"
+        on_release: root.presser(btn7)
+
+      Button:
+        id: btn8
+        text: ""
+        font_size: "45sp"
+        on_release: root.presser(btn8)
+
+      Button:
+        id: btn9
+        text: ""
+        font_size: "45sp"
+        on_release: root.presser(btn9)
+
+    Label:
+      id: score
+      font_size: "32sp"
+      text: "X GOES FIRST!"
+      halign: "center"
+      pos_hint: {"center_y": .3}
+
+    Button:
+      id: restart
+      text: "Restart The Game"
+      pos_hint: {'center_x': .5, 'center_y': .15}
+      size_hint_y: 0.09
+      size_hint_x: 0.6
+      on_release: root.restart()
+
+    Label:
+      id: game
+      font_size: "14sp"
+      text: "X Wins: 0  |  O Wins: 0"
+      halign: "center"
+      pos_hint: {"center_x": .5, "center_y": .05}
