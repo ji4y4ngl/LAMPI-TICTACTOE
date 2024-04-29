@@ -67,13 +67,13 @@ class Command(BaseCommand):
                 # send association MQTT message
                 new_device.publish_unassociated_msg()
                 # record a new activation
-                self.mp.track(new_device.user.username,
-                              "LAMPI Activation", {
-                                                   'event_type': 'activations',
-                                                   'interface': 'mqtt',
-                                                   'device_id': device_id
-                                                  }
-                              )
+                # self.mp.track(new_device.user.username,
+                #               "LAMPI Activation", {
+                #                                    'event_type': 'activations',
+                #                                    'interface': 'mqtt',
+                #                                    'device_id': device_id
+                #                                   }
+                #               )
 
     def _monitor_broker_bridges(self, client, userdata, message):
         self._monitor_for_new_devices(client, userdata, message)
@@ -89,13 +89,13 @@ class Command(BaseCommand):
         else:
             print("DEVICE {} DISCONNECTED".format(device_id))
             connection_state = 'Disconnected'
-        self.mp.track('mqttbridge', "LAMPI {}".format(connection_state),
-                      {
-                            'event_type': 'devicemonitoring',
-                            'interface': 'mqtt',
-                            'device_id': device_id
-                      }
-                      )
+        # self.mp.track('mqttbridge', "LAMPI {}".format(connection_state),
+        #               {
+        #                     'event_type': 'devicemonitoring',
+        #                     'interface': 'mqtt',
+        #                     'device_id': device_id
+        #               }
+        #               )
 
     def _monitor_lamp_state(self, client, userdata, message):
         results = re.search(DEVICE_STATE_RE_PATTERN, message.topic.lower())
@@ -104,7 +104,7 @@ class Command(BaseCommand):
                        'interface': 'mqtt', 'device_id': device_id}
         event_props.update(json.loads(message.payload.decode('utf-8')))
 
-        self.mp.track('mqttbridge', 'LAMPI State Change', event_props)
+        # self.mp.track('mqttbridge', 'LAMPI State Change', event_props)
 
     def handle(self, *args, **options):
         # self.mp = Mixpanel(settings.MIXPANEL_TOKEN)
