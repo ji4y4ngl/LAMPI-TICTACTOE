@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from lampi.models import *
-from mixpanel import Mixpanel
+# from mixpanel import Mixpanel
 
 
 MQTT_BROKER_RE_PATTERN = (r'\$sys\/broker\/connection\/'
@@ -107,7 +107,7 @@ class Command(BaseCommand):
         self.mp.track('mqttbridge', 'LAMPI State Change', event_props)
 
     def handle(self, *args, **options):
-        self.mp = Mixpanel(settings.MIXPANEL_TOKEN)
+        # self.mp = Mixpanel(settings.MIXPANEL_TOKEN)
 
         self._create_default_user_if_needed()
         self._create_mqtt_client_and_loop_forever()
