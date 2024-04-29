@@ -10,22 +10,28 @@ from paho.mqtt.client import Client
 import pigpio
 from lamp_common import *
 import lampi.lampi_util
-# from mixpanel import Mixpanel
-# from mixpanel_async import AsyncBufferedConsumer
 
 from kivy.lang import Builder
-# from lampi.toe import ToeScreen
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 MQTT_CLIENT_ID = "lamp_ui"
 sm = ScreenManager()
 
-class MainScreen(Screen):
+class LampScreen(Screen):
     pass
 
 # --------------------------------------------------------------------
 
-class ToeScreen(Screen):
+class StartScreen(Screen):
+    
+    def display_popup(self, btn):
+        if self.ids.join == btn:
+            sm.current = 'game'
+        else:
+            sm.current = 'start'
+
+
+class GameScreen(Screen):
     # Define Who's turn it is
 	turn = "X"
 
@@ -175,13 +181,10 @@ class ToeScreen(Screen):
 class LampiApp(App):
 
     def build(self):
-        sm.add_widget(MainScreen(name='main'))
-        sm.add_widget(ToeScreen(name='toe'))
-		# ToeScreen.theme_cls.theme_style = "Dark"
-		# ToeScreen.theme_cls.primary_palette = "BlueGray"
-        # Builder.load_file('toe.kv')
-        # Builder.load_file('main.kv')
-        sm.current = 'main'
+        sm.add_widget(LampScreen(name='lamp'))
+        sm.add_widget(StartScreen(name='start'))
+        sm.add_widget(GameScreen(name='game'))
+        sm.current = 'lamp'
 
         return sm
 
@@ -219,6 +222,7 @@ class LampiApp(App):
     gpio22_pressed = BooleanProperty(False)
     device_associated = BooleanProperty(True)
     game_on = False
+    prev_game_screen = 'start'
 
     def on_start(self):
         self._publish_clock = None
@@ -246,8 +250,6 @@ class LampiApp(App):
     def on_hue(self, instance, value):
         if self._updatingUI:
             return
-        # self._track_ui_event('Slider Change',
-        #                      {'slider': 'hue-slider', 'value': value})
         if self._publish_clock is None:
             self._publish_clock = Clock.schedule_once(
                 lambda dt: self._update_leds(), 0.01)
@@ -255,8 +257,6 @@ class LampiApp(App):
     def on_saturation(self, instance, value):
         if self._updatingUI:
             return
-        # self._track_ui_event('Slider Change',
-        #                      {'slider': 'saturation-slider', 'value': value})
         if self._publish_clock is None:
             self._publish_clock = Clock.schedule_once(
                 lambda dt: self._update_leds(), 0.01)
@@ -264,8 +264,6 @@ class LampiApp(App):
     def on_brightness(self, instance, value):
         if self._updatingUI:
             return
-        # self._track_ui_event('Slider Change',
-        #                      {'slider': 'brightness-slider', 'value': value})
         if self._publish_clock is None:
             self._publish_clock = Clock.schedule_once(
                 lambda dt: self._update_leds(), 0.01)
@@ -273,7 +271,6 @@ class LampiApp(App):
     def on_lamp_is_on(self, instance, value):
         if self._updatingUI:
             return
-        # self._track_ui_event('Toggle Power', {'isOn': value})
         if self._publish_clock is None:
             self._publish_clock = Clock.schedule_once(
                 lambda dt: self._update_leds(), 0.01)
@@ -401,15 +398,16 @@ class LampiApp(App):
             self.network_status_popup.dismiss()
     
     def on_gpio22_pressed(self, instance, value):
-        if sm.current == 'main' and value:
+        if sm.current == 'lamp' and value:
             self.game_on = True
-        if sm.current == 'toe' and value:
+        elif value:
             self.game_on = False
+            self.prev_game_screen = sm.current
 
         if self.game_on:
-            sm.current = 'toe'
+            sm.current = self.prev_game_screen
         else:
-            sm.current = 'main'
+            sm.current = 'lamp'
 
     def _poll_GPIO(self, dt):
         # GPIO17 is the rightmost button when looking front of LAMPI

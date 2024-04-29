@@ -7,7 +7,7 @@
 #:include lampi/controls/color_box.kv
 #:include lampi/colors.kv
 
-<MainScreen>:
+<LampScreen>:
 
   BoxLayout:
     canvas.before:
@@ -60,7 +60,35 @@
         state: 'down' if app.lamp_is_on else 'normal'
         on_state:  app.lamp_is_on = True if self.state == 'down' else False
 
-<ToeScreen>:
+<StartScreen>:
+
+  BoxLayout:
+    canvas.before:
+      Color:
+        rgba: offwhite
+      Rectangle:
+        pos: self.pos
+        size: self.size
+    orientation: 'vertical'
+    BoxLayout:
+      orientation: 'horizontal'
+      padding: 30
+      spacing: 10
+      Button:
+        id: join
+        size_hint: 0.3, .4
+        pos_hint: {'center_y': .5}
+        background_color: 1, 1, 1, 1
+        text: 'Join'
+        on_release: root.display_popup(join)
+      Button:
+        id: create
+        size_hint: 0.3, .4
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        text: 'Create'
+        on_release: root.display_popup(create)
+
+<GameScreen>:
   #  #:kivy 1.2.0
 
   FloatLayout:
