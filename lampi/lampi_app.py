@@ -17,13 +17,14 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 MQTT_CLIENT_ID = "lamp_ui"
 sm = ScreenManager()
 
+
 class LampScreen(Screen):
     pass
 
 # --------------------------------------------------------------------
 
+
 class StartScreen(Screen):
-    
     def display_popup(self, btn):
         if self.ids.join == btn:
             sm.current = 'game'
@@ -32,151 +33,149 @@ class StartScreen(Screen):
 
 
 class GameScreen(Screen):
-    # Define Who's turn it is
-	turn = "X"
+    turn = "X"
+    winner = False
+    X_win = 0
+    O_win = 0
 
-	# Keep Track of win or lose
-	winner = False
-	
-	# Keep track of winners and losers
-	X_win = 0
-	O_win = 0
+    def no_winner(self):
+        if self.winner == False and \
+                self.ids.btn1.disabled == True and \
+                self.ids.btn2.disabled == True and \
+                self.ids.btn3.disabled == True and \
+                self.ids.btn4.disabled == True and \
+                self.ids.btn5.disabled == True and \
+                self.ids.btn6.disabled == True and \
+                self.ids.btn7.disabled == True and \
+                self.ids.btn8.disabled == True and \
+                self.ids.btn9.disabled == True:
+            self.ids.score.text = "IT'S A TIE!!"
 
-	# No Winner
-	def no_winner(self):
-		if self.winner == False and \
-		self.ids.btn1.disabled == True and \
-		self.ids.btn2.disabled == True and \
-		self.ids.btn3.disabled == True and \
-		self.ids.btn4.disabled == True and \
-		self.ids.btn5.disabled == True and \
-		self.ids.btn6.disabled == True and \
-		self.ids.btn7.disabled == True and \
-		self.ids.btn8.disabled == True and \
-		self.ids.btn9.disabled == True:
-			self.ids.score.text = "IT'S A TIE!!"
+        # End The Game
+    def end_game(self, a, b, c):
+        self.winner = True
+        a.color = "red"
+        b.color = "red"
+        c.color = "red"
 
-	# End The Game
-	def end_game(self, a,b,c):
-		self.winner = True
-		a.color = "red"
-		b.color = "red"
-		c.color = "red"
+        # Disable the buttons
+        self.disable_all_buttons()
+        # Set Label for winner
+        self.ids.score.text = f"{a.text} Wins!"
 
-		# Disable the buttons
-		self.disable_all_buttons()
+        # Keep track of winners and loser
+        if a.text == "X":
+            self.X_win = self.X_win + 1
+        else:
+            self.O_win = self.O_win + 1
 
-		# Set Label for winner
-		self.ids.score.text = f"{a.text} Wins!"
+        self.ids.game.text = f"X Wins: {self.X_win}  |  O Wins: {self.O_win}"
 
-		# Keep track of winners and loser
-		if a.text == "X":
-			self.X_win = self.X_win + 1	
-		else:
-			self.O_win = self.O_win + 1
+    def disable_all_buttons(self):
+        # Disable The Buttons
+        self.ids.btn1.disabled = True
+        self.ids.btn2.disabled = True
+        self.ids.btn3.disabled = True
+        self.ids.btn4.disabled = True
+        self.ids.btn5.disabled = True
+        self.ids.btn6.disabled = True
+        self.ids.btn7.disabled = True
+        self.ids.btn8.disabled = True
+        self.ids.btn9.disabled = True
 
-		self.ids.game.text = f"X Wins: {self.X_win}  |  O Wins: {self.O_win}"
+    def win(self):
+        # Across
+        if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn2.text and self.ids.btn2.text == self.ids.btn3.text:
+            self.end_game(self.ids.btn1, self.ids.btn2, self.ids.btn3)
 
-	def disable_all_buttons(self):
-		# Disable The Buttons
-		self.ids.btn1.disabled = True
-		self.ids.btn2.disabled = True
-		self.ids.btn3.disabled = True
-		self.ids.btn4.disabled = True
-		self.ids.btn5.disabled = True
-		self.ids.btn6.disabled = True
-		self.ids.btn7.disabled = True
-		self.ids.btn8.disabled = True
-		self.ids.btn9.disabled = True
+        if self.ids.btn4.text != "" and self.ids.btn4.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn6.text:
+            self.end_game(self.ids.btn4, self.ids.btn5, self.ids.btn6)
 
-	def win(self):
-		# Across
-		if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn2.text and self.ids.btn2.text == self.ids.btn3.text:
-			self.end_game(self.ids.btn1, self.ids.btn2, self.ids.btn3)
+        if self.ids.btn7.text != "" and self.ids.btn7.text == self.ids.btn8.text and self.ids.btn8.text == self.ids.btn9.text:
+            self.end_game(self.ids.btn7, self.ids.btn8, self.ids.btn9)
+        # Down
+        if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn4.text and self.ids.btn4.text == self.ids.btn7.text:
+            self.end_game(self.ids.btn1, self.ids.btn4, self.ids.btn7)
 
-		if self.ids.btn4.text != "" and self.ids.btn4.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn6.text:
-			self.end_game(self.ids.btn4, self.ids.btn5, self.ids.btn6)
+        if self.ids.btn2.text != "" and self.ids.btn2.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn8.text:
+            self.end_game(self.ids.btn2, self.ids.btn5, self.ids.btn8)
 
-		if self.ids.btn7.text != "" and self.ids.btn7.text == self.ids.btn8.text and self.ids.btn8.text == self.ids.btn9.text:
-			self.end_game(self.ids.btn7, self.ids.btn8, self.ids.btn9)
-		# Down
-		if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn4.text and self.ids.btn4.text == self.ids.btn7.text:
-			self.end_game(self.ids.btn1, self.ids.btn4, self.ids.btn7)
+        if self.ids.btn3.text != "" and self.ids.btn3.text == self.ids.btn6.text and self.ids.btn6.text == self.ids.btn9.text:
+            self.end_game(self.ids.btn3, self.ids.btn6, self.ids.btn9)
 
-		if self.ids.btn2.text != "" and self.ids.btn2.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn8.text:
-			self.end_game(self.ids.btn2, self.ids.btn5, self.ids.btn8)
+        # Diagonal
+        if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn9.text:
+            self.end_game(self.ids.btn1, self.ids.btn5, self.ids.btn9)
 
-		if self.ids.btn3.text != "" and self.ids.btn3.text == self.ids.btn6.text and self.ids.btn6.text == self.ids.btn9.text:
-			self.end_game(self.ids.btn3, self.ids.btn6, self.ids.btn9)
+        if self.ids.btn3.text != "" and self.ids.btn3.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn7.text:
+            self.end_game(self.ids.btn3, self.ids.btn5, self.ids.btn7)
 
-		# Diagonal 
-		if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn9.text:
-			self.end_game(self.ids.btn1, self.ids.btn5, self.ids.btn9)
+        self.no_winner()
 
-		if self.ids.btn3.text != "" and self.ids.btn3.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn7.text:
-			self.end_game(self.ids.btn3, self.ids.btn5, self.ids.btn7)
+    def presser(self, btn):
+        if self.turn == 'X':
+            btn.text = "X"
+            btn.disabled = True
+            self.ids.score.text = "O's Turn!"
+            self.turn = "O"
+        else:
+            btn.text = "O"
+            btn.disabled = True
+            self.ids.score.text = "X's Turn!"
+            self.turn = "X"
 
-		self.no_winner()
+        # Check To See if won
+        self.win()
 
-	def presser(self, btn):
-		if self.turn == 'X':
-			btn.text = "X"
-			btn.disabled = True
-			self.ids.score.text = "O's Turn!"
-			self.turn = "O"
-		else:
-			btn.text = "O"
-			btn.disabled = True
-			self.ids.score.text = "X's Turn!"
-			self.turn = "X"
+    def restart(self):
+        # Reset Who's Turn It Is
+        self.turn = "X"
 
-		# Check To See if won
-		self.win()
+        # Enable The Buttons
+        self.ids.btn1.disabled = False
+        self.ids.btn2.disabled = False
+        self.ids.btn3.disabled = False
+        self.ids.btn4.disabled = False
+        self.ids.btn5.disabled = False
+        self.ids.btn6.disabled = False
+        self.ids.btn7.disabled = False
+        self.ids.btn8.disabled = False
+        self.ids.btn9.disabled = False
 
-	def restart(self):
-		# Reset Who's Turn It Is
-		self.turn = "X"
+        # Clear The Buttons
+        self.ids.btn1.text = ""
+        self.ids.btn2.text = ""
+        self.ids.btn3.text = ""
+        self.ids.btn4.text = ""
+        self.ids.btn5.text = ""
+        self.ids.btn6.text = ""
+        self.ids.btn7.text = ""
+        self.ids.btn8.text = ""
+        self.ids.btn9.text = ""
 
-		# Enable The Buttons
-		self.ids.btn1.disabled = False
-		self.ids.btn2.disabled = False
-		self.ids.btn3.disabled = False
-		self.ids.btn4.disabled = False
-		self.ids.btn5.disabled = False
-		self.ids.btn6.disabled = False
-		self.ids.btn7.disabled = False
-		self.ids.btn8.disabled = False
-		self.ids.btn9.disabled = False
+        # Reset The Button Colors
+        self.ids.btn1.color = "green"
+        self.ids.btn2.color = "green"
+        self.ids.btn3.color = "green"
+        self.ids.btn4.color = "green"
+        self.ids.btn5.color = "green"
+        self.ids.btn6.color = "green"
+        self.ids.btn7.color = "green"
+        self.ids.btn8.color = "green"
+        self.ids.btn9.color = "green"
 
-		# Clear The Buttons
-		self.ids.btn1.text = ""
-		self.ids.btn2.text = ""
-		self.ids.btn3.text = ""
-		self.ids.btn4.text = ""
-		self.ids.btn5.text = ""
-		self.ids.btn6.text = ""
-		self.ids.btn7.text = ""
-		self.ids.btn8.text = ""
-		self.ids.btn9.text = ""
+        # Reset The Score Label
+        self.ids.score.text = "X GOES FIRST!"
 
-		# Reset The Button Colors
-		self.ids.btn1.color = "green"
-		self.ids.btn2.color = "green"
-		self.ids.btn3.color = "green"
-		self.ids.btn4.color = "green"
-		self.ids.btn5.color = "green"
-		self.ids.btn6.color = "green"
-		self.ids.btn7.color = "green"
-		self.ids.btn8.color = "green"
-		self.ids.btn9.color = "green"
+        # Reset The Winner Variable
+        self.winner = False
 
-		# Reset The Score Label
-		self.ids.score.text = "X GOES FIRST!"
-
-		# Reset The Winner Variable
-		self.winner = False
+    def exit_game(self):
+        sm.current = 'start'
+        # refresh state ************************************
 
 # -----------------------------------------------------------------------------
+
 
 class LampiApp(App):
 
@@ -318,7 +317,7 @@ class LampiApp(App):
                                  "your device\n"
                                  "on the Web\n{}".format(code)
                                  )
-    
+
     def receive_bridge_connection_status(self, client, userdata, message):
         # monitor if the MQTT bridge to our cloud broker is up
         if message.payload == b"1":
@@ -384,11 +383,11 @@ class LampiApp(App):
                "Broker Bridged: {}\n"
                "Async Analytics"
                ).format(
-                        "",  # version goes here
-                        interface,
-                        ipaddr,
-                        deviceid,
-                        self.mqtt_broker_bridged)
+            "",  # version goes here
+            interface,
+            ipaddr,
+            deviceid,
+            self.mqtt_broker_bridged)
         instance.content.text = msg
 
     def on_gpio17_pressed(self, instance, value):
@@ -396,7 +395,7 @@ class LampiApp(App):
             self.network_status_popup.open()
         else:
             self.network_status_popup.dismiss()
-    
+
     def on_gpio22_pressed(self, instance, value):
         if sm.current == 'lamp' and value:
             self.game_on = True

@@ -91,86 +91,97 @@
 <GameScreen>:
   #  #:kivy 1.2.0
 
-  FloatLayout:
+  BoxLayout:
+    orientation:'vertical'
+  
+    BoxLayout:
+      orientation:'horizontal'
+      size_hint_y: .15
 
-    GridLayout:
-      size_hint: .5, .5
-      pos_hint: {'center_x': .5, 'center_y': .7}
-      cols: 3
-      rows: 3
-
-      Button:
-        id: btn1
-        text: ""
-        font_size: "45sp"
-        on_release: root.presser(btn1)
-
-      Button:
-        id: btn2
-        text: ""
-        font_size: "45sp"
-        on_release: root.presser(btn2)
+      Label:
+        id: score
+        font_size: "15sp"
+        text: "X GOES FIRST!"
+        size_hint_x: .75
 
       Button:
-        id: btn3
-        text: ""
-        font_size: "45sp"
-        on_release: root.presser(btn3)
+        id: quit_game
+        text: 'Quit'
+        size_hint_x: .25
+        on_release: root.exit_game()
+        
+    FloatLayout:
+      GridLayout:
+        size_hint: .5, .5
+        pos_hint: {'center_x': .5, 'center_y': .7}
+        cols: 3
+        rows: 3
+
+        Button:
+          id: btn1
+          text: ""
+          font_size: "45sp"
+          on_release: root.presser(btn1)
+
+        Button:
+          id: btn2
+          text: ""
+          font_size: "45sp"
+          on_release: root.presser(btn2)
+
+        Button:
+          id: btn3
+          text: ""
+          font_size: "45sp"
+          on_release: root.presser(btn3)
+
+        Button:
+          id: btn4
+          text: ""
+          font_size: "45sp"
+          on_release: root.presser(btn4)
+
+        Button:
+          id: btn5
+          text: ""
+          font_size: "45sp"
+          on_release: root.presser(btn5)
+
+        Button:
+          id: btn6
+          text: ""
+          font_size: "45sp"
+          on_release: root.presser(btn6)
+
+        Button:
+          id: btn7
+          text: ""
+          font_size: "45sp"
+          on_release: root.presser(btn7)
+
+        Button:
+          id: btn8
+          text: ""
+          font_size: "45sp"
+          on_release: root.presser(btn8)
+
+        Button:
+          id: btn9
+          text: ""
+          font_size: "45sp"
+          on_release: root.presser(btn9)
 
       Button:
-        id: btn4
-        text: ""
-        font_size: "45sp"
-        on_release: root.presser(btn4)
+        id: restart
+        text: "Restart The Game"
+        pos_hint: {'center_x': .5, 'center_y': .15}
+        size_hint_y: 0.09
+        size_hint_x: 0.6
+        on_release: root.restart()
 
-      Button:
-        id: btn5
-        text: ""
-        font_size: "45sp"
-        on_release: root.presser(btn5)
-
-      Button:
-        id: btn6
-        text: ""
-        font_size: "45sp"
-        on_release: root.presser(btn6)
-
-      Button:
-        id: btn7
-        text: ""
-        font_size: "45sp"
-        on_release: root.presser(btn7)
-
-      Button:
-        id: btn8
-        text: ""
-        font_size: "45sp"
-        on_release: root.presser(btn8)
-
-      Button:
-        id: btn9
-        text: ""
-        font_size: "45sp"
-        on_release: root.presser(btn9)
-
-    Label:
-      id: score
-      font_size: "32sp"
-      text: "X GOES FIRST!"
-      halign: "center"
-      pos_hint: {"center_y": .3}
-
-    Button:
-      id: restart
-      text: "Restart The Game"
-      pos_hint: {'center_x': .5, 'center_y': .15}
-      size_hint_y: 0.09
-      size_hint_x: 0.6
-      on_release: root.restart()
-
-    Label:
-      id: game
-      font_size: "14sp"
-      text: "X Wins: 0  |  O Wins: 0"
-      halign: "center"
-      pos_hint: {"center_x": .5, "center_y": .05}
+      Label:
+        id: game
+        font_size: "14sp"
+        text: "X Wins: 0  |  O Wins: 0"
+        halign: "center"
+        pos_hint: {"center_x": .5, "center_y": .05}
