@@ -126,3 +126,8 @@ LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = 'login'
 
 DEFAULT_USER = 'parked_device_user'
+
+try:
+    from .mixpanel_settings import MIXPANEL_TOKEN
+except (ModuleNotFoundError, ImportError) as e:
+    MIXPANEL_TOKEN = "UPDATE TOKEN IN mixpanel_settings.py"
