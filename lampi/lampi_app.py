@@ -15,7 +15,7 @@ from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 MQTT_CLIENT_ID = "lamp_ui"
-sm = ScreenManager()
+sm = ScreenManager(transition=NoTranstion())
 
 
 class LampScreen(Screen):
