@@ -16,6 +16,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 
 MQTT_CLIENT_ID = "lamp_ui"
 sm = ScreenManager(transition=NoTranstion())
+self.mqtt = Client(client_id=MQTT_CLIENT_ID)
 
 
 class LampScreen(Screen):
@@ -74,12 +75,12 @@ class JoinScreen(Screen):
 
     def on_game_connect(self):
         # TTT Topics
-        self.mqtt.message_callback_add(TTT_TOPIC_GAME_CHANGE,
+        mqtt.message_callback_add(TTT_TOPIC_GAME_CHANGE,
                                        self.receive_new_game_state)
-        self.mqtt.message_callback_add(TTT_TOPIC_ASSOCIATED,
+        mqtt.message_callback_add(TTT_TOPIC_ASSOCIATED,
                                        self.receive_associated_game)
-        self.mqtt.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
-        self.mqtt.subscribe(TTT_TOPIC_ASSOCIATED, qos=2)
+        mqtt.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
+        mqtt.subscribe(TTT_TOPIC_ASSOCIATED, qos=2)
 
         LampiApp.players_turn = 'O'
 
@@ -286,14 +287,13 @@ class LampiApp(App):
         self.mqtt_broker_bridged = False
         self._associated = True
         self.association_code = None
-        self.mqtt = Client(client_id=MQTT_CLIENT_ID)
-        self.mqtt.enable_logger()
-        self.mqtt.will_set(client_state_topic(MQTT_CLIENT_ID), "0",
+        mqtt.enable_logger()
+        mqtt.will_set(client_state_topic(MQTT_CLIENT_ID), "0",
                            qos=2, retain=True)
-        self.mqtt.on_connect = self.on_connect
-        self.mqtt.connect(MQTT_BROKER_HOST, port=MQTT_BROKER_PORT,
+        mqtt.on_connect = self.on_connect
+        mqtt.connect(MQTT_BROKER_HOST, port=MQTT_BROKER_PORT,
                           keepalive=MQTT_BROKER_KEEP_ALIVE_SECS)
-        self.mqtt.loop_start()
+        mqtt.loop_start()
         self.associated_status_popup = self._build_associated_status_popup()
         self.associated_status_popup.bind(on_open=self.update_popup_associated)
         Clock.schedule_interval(self._poll_associated, 0.1)
@@ -333,17 +333,17 @@ class LampiApp(App):
                 lambda dt: self._update_leds(), 0.01)
 
     def on_connect(self, client, userdata, flags, rc):
-        self.mqtt.publish(client_state_topic(MQTT_CLIENT_ID), b"1",
+        mqtt.publish(client_state_topic(MQTT_CLIENT_ID), b"1",
                           qos=2, retain=True)
-        self.mqtt.message_callback_add(TOPIC_LAMP_CHANGE_NOTIFICATION,
+        mqtt.message_callback_add(TOPIC_LAMP_CHANGE_NOTIFICATION,
                                        self.receive_new_lamp_state)
-        self.mqtt.message_callback_add(broker_bridge_connection_topic(),
+        mqtt.message_callback_add(broker_bridge_connection_topic(),
                                        self.receive_bridge_connection_status)
-        self.mqtt.message_callback_add(TOPIC_LAMP_ASSOCIATED,
+        mqtt.message_callback_add(TOPIC_LAMP_ASSOCIATED,
                                        self.receive_associated)
-        self.mqtt.subscribe(broker_bridge_connection_topic(), qos=1)
-        self.mqtt.subscribe(TOPIC_LAMP_CHANGE_NOTIFICATION, qos=1)
-        self.mqtt.subscribe(TOPIC_LAMP_ASSOCIATED, qos=2)
+        mqtt.subscribe(broker_bridge_connection_topic(), qos=1)
+        mqtt.subscribe(TOPIC_LAMP_CHANGE_NOTIFICATION, qos=1)
+        mqtt.subscribe(TOPIC_LAMP_ASSOCIATED, qos=2)
 
     def _poll_associated(self, dt):
         # this polling loop allows us to synchronize changes from the
@@ -411,7 +411,7 @@ class LampiApp(App):
                'brightness': self._brightness,
                'on': self.lamp_is_on,
                'client': MQTT_CLIENT_ID}
-        self.mqtt.publish(TOPIC_SET_LAMP_CONFIG,
+        mqtt.publish(TOPIC_SET_LAMP_CONFIG,
                           json.dumps(msg).encode('utf-8'),
                           qos=1)
         self._publish_clock = None
