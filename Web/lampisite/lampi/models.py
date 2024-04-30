@@ -6,6 +6,7 @@ import paho.mqtt.publish
 
 # Create your models here.
 DEFAULT_USER = 'parked_device_user'
+DEFAULT_PLAYER2 = 'no_player'
 
 
 def get_parked_user():

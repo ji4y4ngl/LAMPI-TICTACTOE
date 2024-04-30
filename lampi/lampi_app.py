@@ -25,11 +25,64 @@ class LampScreen(Screen):
 
 
 class StartScreen(Screen):
+    game_association_code = None
+    create_popup = BooleanProperty(False)
+    game_associated = BooleanProperty(False)
+
+    def on_pre_enter():
+
+
     def display_popup(self, btn):
         if self.ids.join == btn:
-            sm.current = 'game'
+            sm.current = 'join'
         else:
             sm.current = 'start'
+
+    # def _join_popup(self):
+    #     return Popup(title='Join game by association code',
+    #                  content=Label(text='Join Game: ', font_size='30sp'),
+    #                  size_hint=(1, 1), auto_dismiss=False)
+
+    def on_create_popup(self, instance, value):
+        if value:
+            self.create_popup.dismiss()
+        else:
+            self.create_popup.open()
+    
+    self.create_popup = self._build_create_popup()
+
+    def _build_create_popup(self):
+        code = self.game_association_code[0:6]
+        return Popup(title='Game Association Code',
+                     content=Label(text=f"Association Code: {code}", font_size='30sp'),
+                     size_hint=(1, 1), auto_dismiss=False)
+    
+    def _poll_game_associated(self, dt):
+        self.device_associated_to_game = self._game_associated
+
+    def receive_associated_game)(self, client, userdata, message):
+        new_associated = json.loads(message.payload.decode('utf-8'))
+        if self._game_associated != new_associated['associated']:
+            if not new_associated['associated']:
+                self.game_association_code = new_associated['code']
+            else:
+                self.game_association_code = None
+            self._game_associated = new_associated['associated']
+
+class JoinScreen(Screen):
+    self.add_widget(LampiAp(text = text))
+
+    def on_game_connect(self):
+        # TTT Topics
+        self.mqtt.message_callback_add(TTT_TOPIC_GAME_CHANGE,
+                                       self.receive_new_game_state)
+        self.mqtt.message_callback_add(TTT_TOPIC_ASSOCIATED,
+                                       self.receive_associated_game)
+        self.mqtt.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
+        self.mqtt.subscribe(TTT_TOPIC_ASSOCIATED, qos=2)
+
+        LampiApp.players_turn = 'O'
+
 
 
 class GameScreen(Screen):
@@ -37,7 +90,9 @@ class GameScreen(Screen):
     winner = False
     X_win = 0
     O_win = 0
-
+    game_state = [[0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0]]
     def no_winner(self):
         if self.winner == False and \
                 self.ids.btn1.disabled == True and \
@@ -220,8 +275,11 @@ class LampiApp(App):
     gpio17_pressed = BooleanProperty(False)
     gpio22_pressed = BooleanProperty(False)
     device_associated = BooleanProperty(True)
+    
+    #state variables for ttt game only
     game_on = False
     prev_game_screen = 'start'
+    players_turn = 'n'
 
     def on_start(self):
         self._publish_clock = None
