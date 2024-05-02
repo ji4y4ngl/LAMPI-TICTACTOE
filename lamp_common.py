@@ -8,10 +8,9 @@ TOPIC_LAMP_CHANGE_NOTIFICATION = "lamp/changed"
 TOPIC_LAMP_ASSOCIATED = "lamp/associated"
 
 # TTT Game MQTT Topics
-TTT_TOPIC_GAME_CONFIG = "lamp/ttt/set_config"
+TTT_TOPIC_SET_GAME_CONFIG = "lamp/ttt/set_config"
 TTT_TOPIC_GAME_CHANGE = "lamp/ttt/changed"
-TTT_TOPIC_ASSOCIATE = "lamp/ttt/set_game"
-TTT_TOPIC_ASSOCIATED = "lamp/ttt/curr_game"
+TTT_TOPIC_ASSOCIATE = "lamp/ttt/associate_game"
 
 def get_device_id():
     mac_addr = open(DEVICE_ID_FILENAME).read().strip()

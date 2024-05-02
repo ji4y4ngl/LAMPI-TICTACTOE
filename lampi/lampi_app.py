@@ -18,6 +18,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 MQTT_CLIENT_ID = "lamp_ui"
 sm = ScreenManager(transition=NoTransition())
 mqtt = Client(client_id=MQTT_CLIENT_ID)
+players_turn = 'None'
 
 
 class LampScreen(Screen):
@@ -27,9 +28,9 @@ class LampScreen(Screen):
 
 
 class StartScreen(Screen):
-    associated_player2 = "Null"
-    _associated_to_game = True #make trtue until person actually starts game
-    game_association_code = None
+    associated_player2 = 'None'
+    _associated_to_game = True #make true until person actually starts game
+    game_association_code = 'None'
     game_state = []
 
     def on_pre_enter(self):
@@ -95,7 +96,7 @@ class JoinScreen(Screen):
     # sm.add_widget(LampiApp(_updated = _updated))
 
     def on_game_connect(self):
-        LampiApp.players_turn = 'O'
+        print("connected")
 
 
 
@@ -366,10 +367,10 @@ class LampiApp(App):
         # TTT Topics
         mqtt.message_callback_add(TTT_TOPIC_GAME_CHANGE,
                                        self.receive_new_game_state)
-        mqtt.message_callback_add(TTT_TOPIC_ASSOCIATED,
+        mqtt.message_callback_add(TTT_TOPIC_ASSOCIATE,
                                        self.receive_associated_game)
         mqtt.subscribe(TTT_TOPIC_GAME_CHANGE, qos=1)
-        mqtt.subscribe(TTT_TOPIC_ASSOCIATED, qos=1)
+        mqtt.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
 
     def receive_associated_game(self, client, userdata, message):
         new_associated = json.loads(message.payload.decode('utf-8'))
