@@ -122,16 +122,7 @@ class GameScreen(Screen):
                 [0, 0, 0],
                 [0, 0, 0]]
     def no_winner(self):
-        if self.winner == False and \
-                self.ids.btn1.disabled == True and \
-                self.ids.btn2.disabled == True and \
-                self.ids.btn3.disabled == True and \
-                self.ids.btn4.disabled == True and \
-                self.ids.btn5.disabled == True and \
-                self.ids.btn6.disabled == True and \
-                self.ids.btn7.disabled == True and \
-                self.ids.btn8.disabled == True and \
-                self.ids.btn9.disabled == True:
+        if self.winner == False and all(all(cell != 0 for cell in row) for row in self.game_state):
             self.ids.score.text = "IT'S A TIE!!"
 
         # End The Game
@@ -156,96 +147,68 @@ class GameScreen(Screen):
 
     def disable_all_buttons(self):
         # Disable The Buttons
-        self.ids.btn1.disabled = True
-        self.ids.btn2.disabled = True
-        self.ids.btn3.disabled = True
-        self.ids.btn4.disabled = True
-        self.ids.btn5.disabled = True
-        self.ids.btn6.disabled = True
-        self.ids.btn7.disabled = True
-        self.ids.btn8.disabled = True
-        self.ids.btn9.disabled = True
+        for row in range(3):
+            for col in range(3):
+                btn_id = f"btn{row * 3 + col + 1}"
+                self.ids[btn_id].disabled = True
 
     def win(self):
-        # Across
-        if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn2.text and self.ids.btn2.text == self.ids.btn3.text:
-            self.end_game(self.ids.btn1, self.ids.btn2, self.ids.btn3)
+        for row in self.game_state:
+            if row[0] != 0 and all(cell == row[0] for cell in row):
+                self.end_game(self.ids[f"btn{row[0]}"], self.ids[f"btn{row[1]}"], self.ids[f"btn{row[2]}"])
 
-        if self.ids.btn4.text != "" and self.ids.btn4.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn6.text:
-            self.end_game(self.ids.btn4, self.ids.btn5, self.ids.btn6)
+        for col in range(3):
+            if self.game_state[0][col] != 0 and \
+               self.game_state[0][col] == self.game_state[1][col] == self.game_state[2][col]:
+                self.end_game(self.ids[f"btn{self.game_state[0][col]}"], self.ids[f"btn{self.game_state[1][col]}"], self.ids[f"btn{self.game_state[2][col]}"])
 
-        if self.ids.btn7.text != "" and self.ids.btn7.text == self.ids.btn8.text and self.ids.btn8.text == self.ids.btn9.text:
-            self.end_game(self.ids.btn7, self.ids.btn8, self.ids.btn9)
-        # Down
-        if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn4.text and self.ids.btn4.text == self.ids.btn7.text:
-            self.end_game(self.ids.btn1, self.ids.btn4, self.ids.btn7)
+        if self.game_state[0][0] != 0 and self.game_state[0][0] == self.game_state[1][1] == self.game_state[2][2]:
+            self.end_game(self.ids[f"btn{self.game_state[0][0]}"], self.ids[f"btn{self.game_state[1][1]}"], self.ids[f"btn{self.game_state[2][2]}"])
 
-        if self.ids.btn2.text != "" and self.ids.btn2.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn8.text:
-            self.end_game(self.ids.btn2, self.ids.btn5, self.ids.btn8)
-
-        if self.ids.btn3.text != "" and self.ids.btn3.text == self.ids.btn6.text and self.ids.btn6.text == self.ids.btn9.text:
-            self.end_game(self.ids.btn3, self.ids.btn6, self.ids.btn9)
-
-        # Diagonal
-        if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn9.text:
-            self.end_game(self.ids.btn1, self.ids.btn5, self.ids.btn9)
-
-        if self.ids.btn3.text != "" and self.ids.btn3.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn7.text:
-            self.end_game(self.ids.btn3, self.ids.btn5, self.ids.btn7)
+        if self.game_state[0][2] != 0 and self.game_state[0][2] == self.game_state[1][1] == self.game_state[2][0]:
+            self.end_game(self.ids[f"btn{self.game_state[0][2]}"], self.ids[f"btn{self.game_state[1][1]}"], self.ids[f"btn{self.game_state[2][0]}"])
 
         self.no_winner()
 
     def presser(self, btn):
-        if self.turn == 'X':
-            btn.text = "X"
-            btn.disabled = True
-            self.ids.score.text = "O's Turn!"
-            self.turn = "O"
-        else:
-            btn.text = "O"
-            btn.disabled = True
-            self.ids.score.text = "X's Turn!"
-            self.turn = "X"
+        print(btn.numid)
+        print(type(btn.numid))
+        if btn.text == "":
+            if self.turn == 'X':
+                btn.text = "X"
+                row = (int(btn.numid) - 1) // 3
+                col = (int(btn.numid) - 1) % 3
+                print("player1", row, col)
+                self.game_state[row][col] = 1
+                self.ids.score.text = "O's Turn!"
+                self.turn = "O"
+            else:
+                btn.text = "O"
+                row = (int(btn.numid) - 1) // 3
+                col = (int(btn.numid) - 1) % 3
+                print("player2", row, col)
+                self.game_state[row][col] = 2
+                self.ids.score.text = "X's Turn!"
+                self.turn = "X"
 
         # Check To See if won
         self.win()
 
     def restart(self):
-        # Reset Who's Turn It Is
+        # # Reset The Winner Variable
         self.turn = "X"
+        self.winner = False
+        self.game_state = [[0, 0, 0],
+                           [0, 0, 0],
+                           [0, 0, 0]]
 
         # Enable The Buttons
-        self.ids.btn1.disabled = False
-        self.ids.btn2.disabled = False
-        self.ids.btn3.disabled = False
-        self.ids.btn4.disabled = False
-        self.ids.btn5.disabled = False
-        self.ids.btn6.disabled = False
-        self.ids.btn7.disabled = False
-        self.ids.btn8.disabled = False
-        self.ids.btn9.disabled = False
-
-        # Clear The Buttons
-        self.ids.btn1.text = ""
-        self.ids.btn2.text = ""
-        self.ids.btn3.text = ""
-        self.ids.btn4.text = ""
-        self.ids.btn5.text = ""
-        self.ids.btn6.text = ""
-        self.ids.btn7.text = ""
-        self.ids.btn8.text = ""
-        self.ids.btn9.text = ""
-
-        # Reset The Button Colors
-        self.ids.btn1.color = "green"
-        self.ids.btn2.color = "green"
-        self.ids.btn3.color = "green"
-        self.ids.btn4.color = "green"
-        self.ids.btn5.color = "green"
-        self.ids.btn6.color = "green"
-        self.ids.btn7.color = "green"
-        self.ids.btn8.color = "green"
-        self.ids.btn9.color = "green"
+        for row in range(3):
+            for col in range(3):
+                btn_id = f"btn{row * 3 + col + 1}"
+                self.ids[btn_id].disabled = False
+                self.ids[btn_id].text = ""
+                self.ids[btn_id].color = "green"
 
         # Reset The Score Label
         self.ids.score.text = "X GOES FIRST!"
