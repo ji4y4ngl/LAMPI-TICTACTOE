@@ -6,248 +6,39 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from math import fabs
 import json
+import os
 from paho.mqtt.client import Client
 import pigpio
 from lamp_common import *
 import lampi.lampi_util
+from mixpanel import Mixpanel, BufferedConsumer
 
-from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen
 
 MQTT_CLIENT_ID = "lamp_ui"
-sm = ScreenManager(transition=NoTranstion())
 
+try:
+    from .mixpanel_settings import MIXPANEL_TOKEN
+except (ModuleNotFoundError, ImportError) as e:
+    MIXPANEL_TOKEN = "UPDATE TOKEN IN mixpanel_settings.py"
 
-class LampScreen(Screen):
-    pass
-
-# --------------------------------------------------------------------
-
-
-class StartScreen(Screen):
-    game_association_code = None
-    create_popup = BooleanProperty(False)
-    game_associated = BooleanProperty(False)
-
-    def on_pre_enter():
-
-
-    def display_popup(self, btn):
-        if self.ids.join == btn:
-            sm.current = 'join'
-        else:
-            sm.current = 'start'
-
-    # def _join_popup(self):
-    #     return Popup(title='Join game by association code',
-    #                  content=Label(text='Join Game: ', font_size='30sp'),
-    #                  size_hint=(1, 1), auto_dismiss=False)
-
-    def on_create_popup(self, instance, value):
-        if value:
-            self.create_popup.dismiss()
-        else:
-            self.create_popup.open()
-    
-    self.create_popup = self._build_create_popup()
-
-    def _build_create_popup(self):
-        code = self.game_association_code[0:6]
-        return Popup(title='Game Association Code',
-                     content=Label(text=f"Association Code: {code}", font_size='30sp'),
-                     size_hint=(1, 1), auto_dismiss=False)
-    
-    def _poll_game_associated(self, dt):
-        self.device_associated_to_game = self._game_associated
-
-    def receive_associated_game)(self, client, userdata, message):
-        new_associated = json.loads(message.payload.decode('utf-8'))
-        if self._game_associated != new_associated['associated']:
-            if not new_associated['associated']:
-                self.game_association_code = new_associated['code']
-            else:
-                self.game_association_code = None
-            self._game_associated = new_associated['associated']
-
-class JoinScreen(Screen):
-    self.add_widget(LampiAp(text = text))
-
-    def on_game_connect(self):
-        # TTT Topics
-        self.mqtt.message_callback_add(TTT_TOPIC_GAME_CHANGE,
-                                       self.receive_new_game_state)
-        self.mqtt.message_callback_add(TTT_TOPIC_ASSOCIATED,
-                                       self.receive_associated_game)
-        self.mqtt.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
-        self.mqtt.subscribe(TTT_TOPIC_ASSOCIATED, qos=2)
-
-        LampiApp.players_turn = 'O'
-
-
-
-class GameScreen(Screen):
-    turn = "X"
-    winner = False
-    X_win = 0
-    O_win = 0
-    game_state = [[0, 0, 0],
-                [0, 0, 0],
-                [0, 0, 0]]
-    def no_winner(self):
-        if self.winner == False and \
-                self.ids.btn1.disabled == True and \
-                self.ids.btn2.disabled == True and \
-                self.ids.btn3.disabled == True and \
-                self.ids.btn4.disabled == True and \
-                self.ids.btn5.disabled == True and \
-                self.ids.btn6.disabled == True and \
-                self.ids.btn7.disabled == True and \
-                self.ids.btn8.disabled == True and \
-                self.ids.btn9.disabled == True:
-            self.ids.score.text = "IT'S A TIE!!"
-
-        # End The Game
-    def end_game(self, a, b, c):
-        self.winner = True
-        a.color = "red"
-        b.color = "red"
-        c.color = "red"
-
-        # Disable the buttons
-        self.disable_all_buttons()
-        # Set Label for winner
-        self.ids.score.text = f"{a.text} Wins!"
-
-        # Keep track of winners and loser
-        if a.text == "X":
-            self.X_win = self.X_win + 1
-        else:
-            self.O_win = self.O_win + 1
-
-        self.ids.game.text = f"X Wins: {self.X_win}  |  O Wins: {self.O_win}"
-
-    def disable_all_buttons(self):
-        # Disable The Buttons
-        self.ids.btn1.disabled = True
-        self.ids.btn2.disabled = True
-        self.ids.btn3.disabled = True
-        self.ids.btn4.disabled = True
-        self.ids.btn5.disabled = True
-        self.ids.btn6.disabled = True
-        self.ids.btn7.disabled = True
-        self.ids.btn8.disabled = True
-        self.ids.btn9.disabled = True
-
-    def win(self):
-        # Across
-        if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn2.text and self.ids.btn2.text == self.ids.btn3.text:
-            self.end_game(self.ids.btn1, self.ids.btn2, self.ids.btn3)
-
-        if self.ids.btn4.text != "" and self.ids.btn4.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn6.text:
-            self.end_game(self.ids.btn4, self.ids.btn5, self.ids.btn6)
-
-        if self.ids.btn7.text != "" and self.ids.btn7.text == self.ids.btn8.text and self.ids.btn8.text == self.ids.btn9.text:
-            self.end_game(self.ids.btn7, self.ids.btn8, self.ids.btn9)
-        # Down
-        if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn4.text and self.ids.btn4.text == self.ids.btn7.text:
-            self.end_game(self.ids.btn1, self.ids.btn4, self.ids.btn7)
-
-        if self.ids.btn2.text != "" and self.ids.btn2.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn8.text:
-            self.end_game(self.ids.btn2, self.ids.btn5, self.ids.btn8)
-
-        if self.ids.btn3.text != "" and self.ids.btn3.text == self.ids.btn6.text and self.ids.btn6.text == self.ids.btn9.text:
-            self.end_game(self.ids.btn3, self.ids.btn6, self.ids.btn9)
-
-        # Diagonal
-        if self.ids.btn1.text != "" and self.ids.btn1.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn9.text:
-            self.end_game(self.ids.btn1, self.ids.btn5, self.ids.btn9)
-
-        if self.ids.btn3.text != "" and self.ids.btn3.text == self.ids.btn5.text and self.ids.btn5.text == self.ids.btn7.text:
-            self.end_game(self.ids.btn3, self.ids.btn5, self.ids.btn7)
-
-        self.no_winner()
-
-    def presser(self, btn):
-        if self.turn == 'X':
-            btn.text = "X"
-            btn.disabled = True
-            self.ids.score.text = "O's Turn!"
-            self.turn = "O"
-        else:
-            btn.text = "O"
-            btn.disabled = True
-            self.ids.score.text = "X's Turn!"
-            self.turn = "X"
-
-        # Check To See if won
-        self.win()
-
-    def restart(self):
-        # Reset Who's Turn It Is
-        self.turn = "X"
-
-        # Enable The Buttons
-        self.ids.btn1.disabled = False
-        self.ids.btn2.disabled = False
-        self.ids.btn3.disabled = False
-        self.ids.btn4.disabled = False
-        self.ids.btn5.disabled = False
-        self.ids.btn6.disabled = False
-        self.ids.btn7.disabled = False
-        self.ids.btn8.disabled = False
-        self.ids.btn9.disabled = False
-
-        # Clear The Buttons
-        self.ids.btn1.text = ""
-        self.ids.btn2.text = ""
-        self.ids.btn3.text = ""
-        self.ids.btn4.text = ""
-        self.ids.btn5.text = ""
-        self.ids.btn6.text = ""
-        self.ids.btn7.text = ""
-        self.ids.btn8.text = ""
-        self.ids.btn9.text = ""
-
-        # Reset The Button Colors
-        self.ids.btn1.color = "green"
-        self.ids.btn2.color = "green"
-        self.ids.btn3.color = "green"
-        self.ids.btn4.color = "green"
-        self.ids.btn5.color = "green"
-        self.ids.btn6.color = "green"
-        self.ids.btn7.color = "green"
-        self.ids.btn8.color = "green"
-        self.ids.btn9.color = "green"
-
-        # Reset The Score Label
-        self.ids.score.text = "X GOES FIRST!"
-
-        # Reset The Winner Variable
-        self.winner = False
-
-    def exit_game(self):
-        sm.current = 'start'
-        # refresh state ************************************
-
-# -----------------------------------------------------------------------------
+version_path = os.path.join(os.path.dirname(__file__), '__VERSION__')
+try:
+    with open(version_path, 'r') as version_file:
+        LAMPI_APP_VERSION = version_file.read()
+except IOError:
+    # if version file cannot be opened, we'll stick with unknown
+    LAMPI_APP_VERSION = 'Unknown'
 
 
 class LampiApp(App):
-
-    def build(self):
-        sm.add_widget(LampScreen(name='lamp'))
-        sm.add_widget(StartScreen(name='start'))
-        sm.add_widget(GameScreen(name='game'))
-        sm.current = 'lamp'
-
-        return sm
-
-    lamp_is_on = BooleanProperty()
     _updated = False
     _updatingUI = False
     _hue = NumericProperty()
     _saturation = NumericProperty()
     _brightness = NumericProperty()
+    lamp_is_on = BooleanProperty()
+
+    mp = Mixpanel(MIXPANEL_TOKEN, consumer=BufferedConsumer(max_size=5))
 
     def _get_hue(self):
         return self._hue
@@ -273,13 +64,7 @@ class LampiApp(App):
     brightness = AliasProperty(_get_brightness, _set_brightness,
                                bind=['_brightness'])
     gpio17_pressed = BooleanProperty(False)
-    gpio22_pressed = BooleanProperty(False)
     device_associated = BooleanProperty(True)
-    
-    #state variables for ttt game only
-    game_on = False
-    prev_game_screen = 'start'
-    players_turn = 'n'
 
     def on_start(self):
         self._publish_clock = None
@@ -294,10 +79,10 @@ class LampiApp(App):
         self.mqtt.connect(MQTT_BROKER_HOST, port=MQTT_BROKER_PORT,
                           keepalive=MQTT_BROKER_KEEP_ALIVE_SECS)
         self.mqtt.loop_start()
+        self.set_up_GPIO_and_device_status_popup()
         self.associated_status_popup = self._build_associated_status_popup()
         self.associated_status_popup.bind(on_open=self.update_popup_associated)
         Clock.schedule_interval(self._poll_associated, 0.1)
-        self.set_up_GPIO_and_device_status_popup()
 
     def _build_associated_status_popup(self):
         return Popup(title='Associate your Lamp',
@@ -307,6 +92,8 @@ class LampiApp(App):
     def on_hue(self, instance, value):
         if self._updatingUI:
             return
+        self._track_ui_event('Slider Change',
+                             {'slider': 'hue-slider', 'value': value})
         if self._publish_clock is None:
             self._publish_clock = Clock.schedule_once(
                 lambda dt: self._update_leds(), 0.01)
@@ -314,6 +101,8 @@ class LampiApp(App):
     def on_saturation(self, instance, value):
         if self._updatingUI:
             return
+        self._track_ui_event('Slider Change',
+                             {'slider': 'saturation-slider', 'value': value})
         if self._publish_clock is None:
             self._publish_clock = Clock.schedule_once(
                 lambda dt: self._update_leds(), 0.01)
@@ -321,6 +110,8 @@ class LampiApp(App):
     def on_brightness(self, instance, value):
         if self._updatingUI:
             return
+        self._track_ui_event('Slider Change',
+                             {'slider': 'brightness-slider', 'value': value})
         if self._publish_clock is None:
             self._publish_clock = Clock.schedule_once(
                 lambda dt: self._update_leds(), 0.01)
@@ -328,9 +119,19 @@ class LampiApp(App):
     def on_lamp_is_on(self, instance, value):
         if self._updatingUI:
             return
+        self._track_ui_event('Toggle Power', {'isOn': value})
         if self._publish_clock is None:
             self._publish_clock = Clock.schedule_once(
                 lambda dt: self._update_leds(), 0.01)
+
+    def _track_ui_event(self, event_name, additional_props={}):
+        device_id = lampi.lampi_util.get_device_id()
+
+        event_props = {'event_type': 'ui', 'interface': 'lampi',
+                       'device_id': device_id}
+        event_props.update(additional_props)
+
+        self.mp.track(device_id, event_name, event_props)
 
     def on_connect(self, client, userdata, flags, rc):
         self.mqtt.publish(client_state_topic(MQTT_CLIENT_ID), b"1",
@@ -420,18 +221,16 @@ class LampiApp(App):
         self.pi = pigpio.pi()
         self.pi.set_mode(17, pigpio.INPUT)
         self.pi.set_pull_up_down(17, pigpio.PUD_UP)
-        self.pi.set_mode(22, pigpio.INPUT)
-        self.pi.set_pull_up_down(22, pigpio.PUD_UP)
         Clock.schedule_interval(self._poll_GPIO, 0.05)
         self.network_status_popup = self._build_network_status_popup()
-        self.network_status_popup.bind(on_open=self.update_device_status_popup)
+        self.network_status_popup.bind(on_open=self._update_dev_status_popup)
 
     def _build_network_status_popup(self):
         return Popup(title='Device Status',
                      content=Label(text='IP ADDRESS WILL GO HERE'),
                      size_hint=(1, 1), auto_dismiss=False)
 
-    def update_device_status_popup(self, instance):
+    def _update_dev_status_popup(self, instance):
         interface = "wlan0"
         ipaddr = lampi.lampi_util.get_ip_address(interface)
         deviceid = lampi.lampi_util.get_device_id()
@@ -439,13 +238,13 @@ class LampiApp(App):
                "{}: {}\n"
                "DeviceID: {}\n"
                "Broker Bridged: {}\n"
-               "Async Analytics"
+               "Buffered Analytics"
                ).format(
-            "",  # version goes here
-            interface,
-            ipaddr,
-            deviceid,
-            self.mqtt_broker_bridged)
+                        LAMPI_APP_VERSION,
+                        interface,
+                        ipaddr,
+                        deviceid,
+                        self.mqtt_broker_bridged)
         instance.content.text = msg
 
     def on_gpio17_pressed(self, instance, value):
@@ -454,20 +253,6 @@ class LampiApp(App):
         else:
             self.network_status_popup.dismiss()
 
-    def on_gpio22_pressed(self, instance, value):
-        if sm.current == 'lamp' and value:
-            self.game_on = True
-        elif value:
-            self.game_on = False
-            self.prev_game_screen = sm.current
-
-        if self.game_on:
-            sm.current = self.prev_game_screen
-        else:
-            sm.current = 'lamp'
-
     def _poll_GPIO(self, dt):
         # GPIO17 is the rightmost button when looking front of LAMPI
         self.gpio17_pressed = not self.pi.read(17)
-        # for tictactoe game
-        self.gpio22_pressed = not self.pi.read(22)
