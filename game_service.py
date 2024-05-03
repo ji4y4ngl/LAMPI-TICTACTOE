@@ -60,8 +60,8 @@ class GameService(object):
         # TTT TOPICS
         client.message_callback_add(TTT_TOPIC_ASSOCIATE,
                                     self.on_message_set_game_association)
-        client.message_callback_add(TTT_TOPIC_SET_CONFIG,
-                                    self.on_message_set_game_config)
+        # client.message_callback_add(TTT_TOPIC_SET_CONFIG,
+        #                             self.on_message_set_game_config)
         
         return client
 
