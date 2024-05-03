@@ -124,7 +124,7 @@ class StartScreen(Screen):
                                  f"{code}\n"
                                  "\n"
                                  "Send this to\n"
-                                 "friend!\n")
+                                 "a friend!\n")
 
 class JoinScreen(Screen):
     game_updated = False
@@ -285,9 +285,13 @@ class GameScreen(Screen):
         print(self.board_state)
         print(f"turn: {self.turn}")
 
+        if device_id == self.mqtt_msg_players[f'{self.turn}']:
+            self.ids.score.text = "Your Turn!"
+            
         for row in range(3):
             for col in range(3):
                 btn_id = f"btn{row * 3 + col}"
+                print(f"board_string @ {row * 3 + col}: {board_string[row * 3 + col]}")
                 if board_string[row * 3 + col] == 1:
                     self.ids[btn_id].text = "X"
                     print(f"updated: {self.ids[btn_id]} to X")
@@ -382,7 +386,7 @@ class GameScreen(Screen):
                 self.board_state[row][col] = 1
                 self.publish_board_state()
                 print('game state2', self.board_state)
-                self.ids.score.text = "O's Turn!"
+                # self.ids.score.text = "O's Turn!"
                 self.turn = "player2"
             elif self.turn == 'player2' and device_id == self.mqtt_msg_players['player2']:
                 btn.text = "O"  # sets tile to O
@@ -393,8 +397,10 @@ class GameScreen(Screen):
                 self.board_state[row][col] = 2
                 self.publish_board_state()
                 print('game state2', self.board_state)
-                self.ids.score.text = "X's Turn!"
+                # self.ids.score.text = "X's Turn!"
                 self.turn = "player1"
+
+            self.ids.score.text = "Friend's Turn!"
 
         # Check To See if won
         self.win()
