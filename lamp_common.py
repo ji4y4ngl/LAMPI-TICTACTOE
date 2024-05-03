@@ -8,7 +8,7 @@ TOPIC_LAMP_CHANGE_NOTIFICATION = "lamp/changed"
 TOPIC_LAMP_ASSOCIATED = "lamp/associated"
 
 # TTT Game MQTT Topics
-TTT_TOPIC_SET_GAME_CONFIG = "lamp/ttt/set_config"
+TTT_TOPIC_SET_CONFIG = "lamp/ttt/set_config"
 TTT_TOPIC_GAME_CHANGE = "lamp/ttt/changed"
 TTT_TOPIC_ASSOCIATE = "lamp/ttt/associate_game"
 

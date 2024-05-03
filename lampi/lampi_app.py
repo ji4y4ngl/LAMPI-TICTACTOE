@@ -90,7 +90,7 @@ class StartScreen(Screen):
     
     def display_popup(self, btn):
         if self.ids.join == btn:
-            sm.current = 'join'
+            sm.current = 'game'
         elif self.ids.create == btn:
             self.create_popup.open()
 
@@ -304,6 +304,7 @@ class GameScreen(Screen):
     def exit_game(self):
         sm.current = 'start'
         # refresh state ************************************
+
 # -----------------------------------------------------------------------------
 
 
