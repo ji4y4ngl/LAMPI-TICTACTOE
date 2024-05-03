@@ -28,6 +28,8 @@ def broker_bridge_connection_topic():
 
 # MQTT Broker Connection info
 MQTT_VERSION = paho.mqtt.client.MQTTv311
-MQTT_BROKER_HOST = "localhost"
-MQTT_BROKER_PORT = 1883
+# MQTT_BROKER_HOST = "localhost"
+# MQTT_BROKER_PORT = 1883
+MQTT_BROKER_HOST = "3.222.78.41"
+MQTT_BROKER_PORT = 50001
 MQTT_BROKER_KEEP_ALIVE_SECS = 60
