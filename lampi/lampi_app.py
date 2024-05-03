@@ -282,11 +282,14 @@ class GameScreen(Screen):
         for index in range(9):
             decoded_board[int(index/3)][index%3] = int(board_string[index])
         self.board_state = decoded_board
+        self.win()
         print(self.board_state)
         print(f"turn: {self.turn}")
 
-        if device_id == self.mqtt_msg_players[f'{self.turn}']:
-            self.ids.score.text = "Your Turn!"
+        if "player1" == self.turn:
+            self.ids.score.text = "X's Turn!"
+        elif "player2" == self.turn:
+            self.ids.score.text = "O's Turn!"
             
         for row in range(3):
             for col in range(3):
@@ -399,8 +402,11 @@ class GameScreen(Screen):
                 print('game state2', self.board_state)
                 # self.ids.score.text = "X's Turn!"
                 self.turn = "player1"
-
-            self.ids.score.text = "Friend's Turn!"
+                
+            if "player1" == self.turn:
+                self.ids.score.text = "X's Turn!"
+            elif "player2" == self.turn:
+                self.ids.score.text = "O's Turn!"
 
         # Check To See if won
         self.win()
