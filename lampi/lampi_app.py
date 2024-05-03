@@ -292,10 +292,10 @@ class GameScreen(Screen):
             for col in range(3):
                 btn_id = f"btn{row * 3 + col}"
                 print(f"board_string @ {row * 3 + col}: {board_string[row * 3 + col]}")
-                if int(board_string[row * 3 + col]) == 1:
+                if int(board_string[row * 3 + col + 1]) == 1:
                     self.ids[btn_id].text = "X"
                     print(f"updated: {self.ids[btn_id]} to X")
-                if int(board_string[row * 3 + col]) == 2:
+                if int(board_string[row * 3 + col + 1]) == 2:
                     self.ids[btn_id].text = "O"
                     print(f"updated: {self.ids[btn_id]} to O")
 
