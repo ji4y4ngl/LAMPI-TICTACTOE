@@ -45,7 +45,7 @@ class StartScreen(Screen):
 
     def __init__(self, **kwargs):
         super(StartScreen, self).__init__(**kwargs)
-        self.game_mqtt_client.connect(MQTT_BROKER_HOST, port=MQTT_BROKER_PORT)
+        self.game_mqtt_client.connect(EC2_MQTT_BROKER_HOST, port=EC2_MQTT_BROKER_PORT)
         self.game_mqtt_client.loop_start()
         self.game_mqtt_client.on_publish = self.on_publish
         self.game_mqtt_client.on_connect = self.on_connect
@@ -171,7 +171,7 @@ class JoinScreen(Screen):
 
     def __init__(self, **kwargs):
         super(JoinScreen, self).__init__(**kwargs)
-        self.game_mqtt_client.connect(MQTT_BROKER_HOST, port=MQTT_BROKER_PORT)
+        self.game_mqtt_client.connect(EC2_MQTT_BROKER_HOST, port=EC2_MQTT_BROKER_PORT)
         self.game_mqtt_client.on_publish = self.on_publish
         self.game_mqtt_client.on_connect = self.on_connect
         self.game_mqtt_client.loop_start()
@@ -261,7 +261,7 @@ class GameScreen(Screen):
 
     def __init__(self, **kwargs):
         super(GameScreen, self).__init__(**kwargs)
-        self.game_mqtt_client.connect(MQTT_BROKER_HOST, port=MQTT_BROKER_PORT)
+        self.game_mqtt_client.connect(EC2_MQTT_BROKER_HOST, port=EC2_MQTT_BROKER_PORT)
         self.game_mqtt_client.loop_start()
         self.game_mqtt_client.on_publish = self.on_publish
         
