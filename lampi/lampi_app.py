@@ -272,6 +272,10 @@ class GameScreen(Screen):
     def receive_new_board_state(self, client, userdata, message):
         new_board_state = json.loads(message.payload.decode('utf-8'))
         self.turn = new_board_state['turn']
+        if self.turn == "player1":
+            self.next_turn = "player2"
+        elif self.turn == "player2":
+            self.next_turn = "player1"
         
         decoded_board = [[0,0,0],[0,0,0],[0,0,0]]
         board_string = new_board_state['board_state']
