@@ -240,9 +240,9 @@ class GameScreen(Screen):
         self.game_mqtt_client.on_connect = self.on_connect
         self.game_mqtt_client.loop_start()
         self.game_mqtt_client.on_publish = self.on_publish
-        self.game_mqtt_client.message_callback_add(TTT_TOPIC_ASSOCIATE,
-                                       self.receive_associated_game)
-        self.game_mqtt_client.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
+        # self.game_mqtt_client.message_callback_add(TTT_TOPIC_ASSOCIATE,
+        #                                self.receive_associated_game)
+        # self.game_mqtt_client.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
 
         board_to_string = ""
         for row in range(3):
@@ -257,6 +257,9 @@ class GameScreen(Screen):
         self.game_mqtt_client.publish(TTT_TOPIC_SET_CONFIG, board_state_json, qos = 1, retain=True)
 
     def on_connect(self, client, userdata, flags, rc):
+        self.game_mqtt_client.message_callback_add(TTT_TOPIC_ASSOCIATE,
+                                       self.receive_associated_game)
+        self.game_mqtt_client.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
         self.game_mqtt_client.message_callback_add(TTT_TOPIC_GAME_CHANGE,
                                        self.receive_new_board_state)
         self.game_mqtt_client.subscribe(TTT_TOPIC_GAME_CHANGE, qos=1)
@@ -283,8 +286,10 @@ class GameScreen(Screen):
                 btn_id = f"btn{row * 3 + col}"
                 if board_string[row * 3 + col] == 1:
                     self.ids[btn_id].text = "X"
+                    print(f"updated: {self.ids[btn_id]} to X")
                 if board_string[row * 3 + col] == 2:
                     self.ids[btn_id].text = "O"
+                    print(f"updated: {self.ids[btn_id]} to O")
 
 
     def on_publish(self, client, userdata, mid):
