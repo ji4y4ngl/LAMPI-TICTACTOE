@@ -76,17 +76,89 @@
       spacing: 10
       Button:
         id: join
-        size_hint: 0.3, .4
+        size_hint: 0.3, 0.4
         pos_hint: {'center_y': .5}
         background_color: 1, 1, 1, 1
         text: 'Join'
         on_release: root.display_popup(join)
       Button:
         id: create
-        size_hint: 0.3, .4
+        size_hint: 0.3, 0.4
         pos_hint: {'center_x': .5, 'center_y': .5}
         text: 'Create'
         on_release: root.display_popup(create)
+
+<JoinScreen>:
+
+  BoxLayout:
+    canvas.before:
+      Color:
+        rgba: offwhite
+      Rectangle:
+        pos: self.pos
+        size: self.size
+    orientation: 'vertical'
+    BoxLayout:
+      orientation: 'horizontal'
+      padding: 10
+      spacing: 10
+      Button:
+        id: x
+        size_hint: 0.3, 0.8
+        pos_hint: {'center_y': .5}
+        background_color: 1, 1, 1, 1
+        text: 'X'
+        on_release: root.btn_pressed(1)
+      Button:
+        id: y
+        size_hint: 0.3, 0.8
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        text: 'Y'
+        on_release: root.btn_pressed(2)
+
+    BoxLayout:
+      orientation: 'horizontal'
+      padding: 8
+      spacing: 5
+      Button:
+        id: A
+        size_hint: 0.3, 0.8
+        pos_hint: {'center_y': .5}
+        background_color: 1, 1, 1, 1
+        text: 'A'
+        on_release: root.btn_pressed(3)
+      Button:
+        id: B
+        size_hint: 0.3, 0.8
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        text: 'B'
+        on_release: root.btn_pressed(4)
+    
+    Label:
+      id: flavor_text
+      font_size: "25sp"
+      text: ""
+      size_hint_x: .6
+      color: "black"
+      pos_hint: {'center_y': .5}
+
+    BoxLayout:
+      orientation: 'vertical'
+      padding: 8
+      spacing: 5
+      Button:
+        id: send
+        size_hint: 0.5, 0.8
+        pos_hint: {'center_y': .5}
+        background_color: 1, 1, 1, 1
+        text: 'Enter'
+        on_release: root.send_associate()
+      Label:
+        id: error_text
+        font_size: "15sp"
+        text: ""
+        size_hint_x: .6
+        color: "black"
 
 <GameScreen>:
   #  #:kivy 1.2.0

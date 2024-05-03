@@ -33,8 +33,9 @@ class LampScreen(Screen):
 # --------------------------------------------------------------------
 
 class StartScreen(Screen):
-    associated_player2 = 'None'
     game_association_code = create_game_code()
+    msgs_player1 = 'None'
+    msgs_player2 = 'None'
     # game_state = [[0, 0, 0],
     #               [0, 0, 0],
     #               [0, 0, 0]]
@@ -49,10 +50,10 @@ class StartScreen(Screen):
         self.game_mqtt_client.on_connect = self.on_connect
 
         self._associated_to_game = True
+        Clock.schedule_interval(self._poll_associated, 0.1)
         
         self.create_popup = self._build_create_popup()
         self.create_popup.bind(on_open=self.update_create_popup)
-        Clock.schedule_interval(self._poll_associated, 0.1)
 
     def on_connect(self, client, userdata, flags, rc):
         # self.game_mqtt_client.message_callback_add(TTT_TOPIC_GAME_CHANGE,
@@ -75,22 +76,25 @@ class StartScreen(Screen):
 
     def receive_associated_game(self, client, userdata, message):
         new_associated = json.loads(message.payload.decode('utf-8'))
-        # if self.associated_player2 != new_associated['player2']:
-        #     if 'None' is not new_associated['player2']:
-        #         self.game_association_code = new_associated['a_code']
-        #         self._associated_to_game = True
-        #     else:
-        #         self._associated_to_game = False
+        if 'None' is not new_associated['player2']:
+            self.msgs_player1 = new_associated['player1']
+            self.msgs_player2 = new_associated['player2']
+            self.game_association_code = new_associated['a_code']
+            self._associated_to_game = True
+        else:
+            self._associated_to_game = False
     
     def on_device_associated_to_game(self, instance, value):
         if value:
             self.create_popup.dismiss()
+            if msgs_player2 is not 'None':
+                sm.current = 'game'
         else:
             self.create_popup.open()
     
     def display_popup(self, btn):
         if self.ids.join == btn:
-            sm.current = 'game'
+            sm.current = 'join'
         elif self.ids.create == btn:
             self.create_popup.open()
 
@@ -102,16 +106,7 @@ class StartScreen(Screen):
 
     def _build_create_popup(self):
         code = self.game_association_code
-        print(code)
-        
-        msg = {'player1': device_id,
-            'player2': self.associated_player2,
-            'a_code': self.game_association_code,
-            'client': GAME_CLIENT_ID}
-        self.game_mqtt_client.publish(TTT_TOPIC_ASSOCIATE,
-                        json.dumps(msg).encode('utf-8'),
-                        qos=1)
-        self._publish_clock = None
+        print(f"asso. code: {code}")
 
         return Popup(title='Game Association Code',
                      content=Label(text='Msg here',
@@ -120,9 +115,17 @@ class StartScreen(Screen):
 
     def update_create_popup(self, instance):
         code = self.game_association_code
-        print(code)
+        print(f"asso. code: {code}")
 
-        # player2 = self.associated_player2
+        msg = {'player1': device_id,
+            'player2': self.msgs_player2,
+            'a_code': self.game_association_code,
+            'client': GAME_CLIENT_ID}
+        self.game_mqtt_client.publish(TTT_TOPIC_ASSOCIATE,
+                        json.dumps(msg).encode('utf-8'),
+                        qos=1)
+        self._publish_clock = None
+
         instance.content.text = ("Association Code:\n"
                                  f"{code}\n"
                                  "\n"
@@ -155,12 +158,94 @@ class StartScreen(Screen):
         # self._updated = True
 
 class JoinScreen(Screen):
-    # sm.add_widget(LampiApp(_updated = _updated))
+    try_association_code = []
+    btn_ids = {'1': 'x',
+               '2': 'y',
+               '3': 'a',
+               '4': 'b'}
+    msgs_player1 = 'None'
+    msgs_player2 = 'None'
+    game_association_code = ''
+    game_started_flag = False
+    device_associated_to_game = BooleanProperty(False)
+    game_mqtt_client = Client(client_id=GAME_CLIENT_ID)
 
-    def on_game_connect(self):
-        print("connected")
+    def __init__(self, **kwargs):
+        super(JoinScreen, self).__init__(**kwargs)
+        print("-----------\n")
+        print("initializing join\n")
+        self.game_mqtt_client.connect(MQTT_BROKER_HOST, port=MQTT_BROKER_PORT)
+        self.game_mqtt_client.loop_start()
+        self.game_mqtt_client.on_publish = self.on_publish
+        self.game_mqtt_client.on_connect = self.on_connect
 
+        self._associated_to_game = False
+        Clock.schedule_interval(self._poll_associated, 0.1)
+        
+    def on_publish(self, client, userdata, mid):
+        print("Message published with mid:", mid)
 
+    def on_connect(self, client, userdata, flags, rc):
+        print("-----------\n")
+        print("connecting\n")
+        self.game_mqtt_client.message_callback_add(TTT_TOPIC_ASSOCIATE,
+                                       self.receive_associated_game)
+        self.game_mqtt_client.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
+    
+    def _poll_associated(self, dt):
+        # this polling loop allows us to synchronize changes from the
+        #  MQTT callbacks (which happen in a different thread) to the
+        #  Kivy UI
+        self.device_associated_to_game = self._associated_to_game
+
+    def receive_associated_game(self, client, userdata, message):
+        new_associated = json.loads(message.payload.decode('utf-8'))
+        print("-----------\n")
+        print("received last asso. msg\n")
+        if 'None' is not new_associated['player2']:
+            self.msgs_player1 = new_associated['player1']
+            self.msgs_player2 = new_associated['player2']
+            self.game_association_code = new_associated['a_code']
+            self.game_started_flag = True
+            self._associated_to_game = True
+            print("-----------\n")
+            print("game full\n")
+        else:
+            self.msgs_player1 = new_associated['player1']
+            self.game_association_code = new_associated['a_code']
+            self.game_started_flag = False
+            self._associated_to_game = False
+            print("-----------\n")
+            print("game waiting\n")
+    
+    def on_device_associated_to_game(self, instance, value):
+        if value:
+            sm.current = 'game'
+            print("connected")
+
+    def btn_pressed(self, btn):
+        self.try_association_code.append(self.btn_ids[str(btn)])
+        self.ids.flavor_text.text = ''.join(self.try_association_code)
+
+    def send_associate(self):
+        if self.game_started_flag:
+            self.ids.error_text.text = "Game Full!"
+        else:
+            code = ''.join(self.try_association_code)
+
+            if code == self.game_association_code:
+                msg = {'player1': msgs_player1,
+                    'player2': self.device_id,
+                    'a_code': self.game_association_code,
+                    'client': GAME_CLIENT_ID}
+                self.game_mqtt_client.publish(TTT_TOPIC_ASSOCIATE,
+                                json.dumps(msg).encode('utf-8'),
+                                qos=1)
+                self._publish_clock = None
+            else:
+                self.ids.error_text.text = f"Invalid! {self.game_association_code}."
+                self.try_association_code = []
+                self.ids.flavor_text.text = ''
 
 class GameScreen(Screen):
     turn = "X"
@@ -316,7 +401,6 @@ class LampiApp(App):
         sm.add_widget(JoinScreen(name='join'))
         sm.add_widget(GameScreen(name='game'))
         sm.current = 'lamp'
-        print(sm.screen_names)
 
         return sm
 
@@ -358,8 +442,6 @@ class LampiApp(App):
     game_on = False
     prev_game_screen = 'start'
     players_turn = 'n'
-    # sm.add_widget(StartScreen(name='start'))
-    # startScr = sm.get_screen('start')
 
     def on_start(self):
         self._publish_clock = None
