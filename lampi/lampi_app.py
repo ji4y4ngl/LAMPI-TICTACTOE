@@ -312,6 +312,7 @@ class LampiApp(App):
     def build(self):
         sm.add_widget(LampScreen(name='lamp'))
         sm.add_widget(StartScreen(name='start'))
+        sm.add_widget(JoinScreen(name='join'))
         sm.add_widget(GameScreen(name='game'))
         sm.current = 'lamp'
         print(sm.screen_names)
