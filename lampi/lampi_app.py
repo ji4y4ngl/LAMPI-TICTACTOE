@@ -283,8 +283,6 @@ class GameScreen(Screen):
             decoded_board[int(index/3)][index%3] = int(board_string[index])
         self.board_state = decoded_board
         self.win()
-        print(self.board_state)
-        print(f"turn: {self.turn}")
 
         if "player1" == self.turn:
             self.ids.score.text = "X's Turn!"
@@ -297,23 +295,19 @@ class GameScreen(Screen):
                 print(f"board_string @ {row * 3 + col}: {board_string[row * 3 + col]}")
                 if int(board_string[row * 3 + col]) == 1:
                     self.ids[btn_id].text = "X"
-                    print(f"updated: {self.ids[btn_id]} to X")
                 if int(board_string[row * 3 + col]) == 2:
                     self.ids[btn_id].text = "O"
-                    print(f"updated: {self.ids[btn_id]} to O")
 
 
     def on_publish(self, client, userdata, mid):
         print("Message published with mid:", mid)
 
     def publish_board_state(self):
-        print("------------\n")
         board_to_string = ""
         for row in range(3):
             for col in range(3):
                 board_to_string = f"{board_to_string}{self.board_state[row][col]}"
         old_turn = self.turn
-        print(f"string board: {board_to_string}")
         
         msg = {'turn': self.next_turn,
                'board_state': board_to_string,
@@ -322,7 +316,6 @@ class GameScreen(Screen):
         board_state_json = json.dumps(msg).encode('utf-8')
         self.game_mqtt_client.publish(TTT_TOPIC_SET_CONFIG, board_state_json, qos = 1, retain=True)
         self.next_turn = old_turn
-        print("new state published", board_state_json)
     
     def no_winner(self):
         if self.winner == False and all(all(cell != 0 for cell in row) for row in self.board_state):
@@ -377,32 +370,24 @@ class GameScreen(Screen):
 
     def presser(self, btn):
         if btn.text == "":
-            print(f"turn: {self.turn}")
-            print(f"player 1: {self.mqtt_msg_players['player1']}")
             
             if self.turn == 'player1' and device_id == self.mqtt_msg_players['player1']:
                 btn.text = "X"  # sets tile to X
                 row = (int(btn.numid) - 1) // 3
                 col = (int(btn.numid) - 1) % 3
-                print("player1", row, col)
-                print('game state1', self.board_state)
                 self.board_state[row][col] = 1
                 self.publish_board_state()
-                print('game state2', self.board_state)
                 # self.ids.score.text = "O's Turn!"
                 self.turn = "player2"
             elif self.turn == 'player2' and device_id == self.mqtt_msg_players['player2']:
                 btn.text = "O"  # sets tile to O
                 row = (int(btn.numid) - 1) // 3
                 col = (int(btn.numid) - 1) % 3
-                print("player2", row, col)
-                print('game state1', self.board_state)
                 self.board_state[row][col] = 2
                 self.publish_board_state()
-                print('game state2', self.board_state)
                 # self.ids.score.text = "X's Turn!"
                 self.turn = "player1"
-                
+
             if "player1" == self.turn:
                 self.ids.score.text = "X's Turn!"
             elif "player2" == self.turn:
