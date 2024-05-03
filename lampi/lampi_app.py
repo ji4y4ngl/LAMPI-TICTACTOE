@@ -528,7 +528,7 @@ class LampiApp(App):
                                        self.receive_associated)
         mqtt.subscribe(broker_bridge_connection_topic(), qos=1)
         mqtt.subscribe(TOPIC_LAMP_CHANGE_NOTIFICATION, qos=1)
-        mqtt.subscribe(TOPIC_LAMP_ASSOCIATED, qos=2)
+        mqtt.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
     
     def _poll_associated(self, dt):
         # this polling loop allows us to synchronize changes from the

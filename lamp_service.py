@@ -61,7 +61,7 @@ class LampService(object):
         self.game_db = shelve.open(GAME_STATE_FILENAME, writeback=True)
 
         if 'player1' not in self.game_db:
-            self.game_db['player1'] = 'None'
+            self.game_db['player1'] = 'test'
         if 'player2' not in self.game_db:
             self.game_db['player2'] = 'None'
         if 'a_code' not in self.game_db:
