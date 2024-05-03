@@ -259,8 +259,8 @@ class GameScreen(Screen):
         self.turn = new_board_state["turn"]
         
         decoded_board = [[0,0,0],[0,0,0],[0,0,0]]
-        for len in range(9):
-            decoded_board[int(len/3)][len%3] = int(new_board_state[len])
+        for index in range(9):
+            decoded_board[int(index/3)][index%3] = int(new_board_state[index])
         print(decoded_board)
         self.board_state = decoded_board
 
