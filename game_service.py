@@ -88,8 +88,10 @@ class GameService(object):
     def on_connect(self, client, userdata, rc, unknown):
         self._client.publish(client_state_topic(MQTT_CLIENT_ID), "1",
                              qos=2, retain=True)
-        # publish current game state at startup
         self.set_last_client('game_service')
+        self._client.message_callback_add(TTT_TOPIC_SET_CONFIG,
+                                    self.on_message_set_game_config)
+        self._client.subscribe(TTT_TOPIC_SET_CONFIG, qos=1)
 
     def default_on_message(self, client, userdata, msg):
         print("Received unexpected message on topic " +
