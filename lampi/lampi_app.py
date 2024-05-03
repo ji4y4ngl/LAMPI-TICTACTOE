@@ -331,10 +331,10 @@ class GameScreen(Screen):
         # Disable the buttons
         self.disable_all_buttons(True)
         # Set Label for winner
-        self.ids.score.text = f"{a.text} Wins!"
+        self.ids.score.text = f"{self.ids[a].text} Wins!"
 
         # Keep track of winners and loser
-        if a.text == "X":
+        if self.ids[a].text == "X":
             self.X_win +=1
         else:
             self.O_win +=1
