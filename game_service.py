@@ -92,8 +92,8 @@ class GameService(object):
         self.set_last_client('game_service')
         # self.publish_game_association_change()
 
-        self._client.subscribe(TTT_TOPIC_SET_CONFIG, qos=1)
-        self.publish_game_config_change()
+        # self._client.subscribe(TTT_TOPIC_SET_CONFIG, qos=1)
+        # self.publish_game_config_change()
 
     def default_on_message(self, client, userdata, msg):
         print("Received unexpected message on topic " +
