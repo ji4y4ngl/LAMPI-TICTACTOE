@@ -101,7 +101,7 @@ class StartScreen(Screen):
                 'client': GAME_CLIENT_ID}
             self.game_mqtt_client.publish(TTT_TOPIC_ASSOCIATE,
                             json.dumps(msg).encode('utf-8'),
-                            qos=1)
+                            qos=1, retain=True)
             self._publish_clock = None
 
             self.create_popup.open()
