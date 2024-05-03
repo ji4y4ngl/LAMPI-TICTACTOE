@@ -260,7 +260,7 @@ class GameScreen(Screen):
         
         decoded_board = [[0,0,0],[0,0,0],[0,0,0]]
         for len in range(9):
-            decoded_board[int(len/3)][len%3] = f"{new_board_state[len]}"
+            decoded_board[int(len/3)][len%3] = int(new_board_state[len])
         print(decoded_board)
         self.board_state = decoded_board
 
