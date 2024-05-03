@@ -276,6 +276,16 @@ class GameScreen(Screen):
             decoded_board[int(index/3)][index%3] = int(board_string[index])
         self.board_state = decoded_board
         print(self.board_state)
+        print(f"turn: {self.turn}")
+
+        for row in range(3):
+            for col in range(3):
+                btn_id = f"btn{row * 3 + col + 1}"
+                if board_string[row * 3 + col + 1] = 1:
+                    self.ids[btn_id].text = "X"
+                if board_string[row * 3 + col + 1] = 2:
+                    self.ids[btn_id].text = "O"
+
 
     def on_publish(self, client, userdata, mid):
         print("Message published with mid:", mid)
@@ -286,6 +296,7 @@ class GameScreen(Screen):
         for row in range(3):
             for col in range(3):
                 board_to_string = f"{board_to_string}{self.board_state[row][col]}"
+        old_turn = self.turn
         
         msg = {'turn': self.next_turn,
                'board_state': board_to_string,
@@ -293,7 +304,7 @@ class GameScreen(Screen):
                'client': GAME_CLIENT_ID}
         board_state_json = json.dumps(msg).encode('utf-8')
         self.game_mqtt_client.publish(TTT_TOPIC_SET_CONFIG, board_state_json, qos = 1, retain=True)
-        self.next_turn = self.turn
+        self.next_turn = old_turn
         print("new state published", board_state_json)
     
     def no_winner(self):
@@ -348,8 +359,6 @@ class GameScreen(Screen):
         self.no_winner()
 
     def presser(self, btn):
-        # print(btn.numid)
-        # print(type(btn.numid))
         if btn.text == "":
             print(f"turn: {self.turn}")
             print(f"player 1: {self.mqtt_msg_players['player1']}")
