@@ -158,6 +158,7 @@ class StartScreen(Screen):
         # self._updated = True
 
 class JoinScreen(Screen):
+    game_updated = False
     try_association_code = []
     btn_ids = {'1': 'x',
                '2': 'y',
@@ -175,9 +176,10 @@ class JoinScreen(Screen):
         print("-----------\n")
         print("initializing join\n")
         self.game_mqtt_client.connect(MQTT_BROKER_HOST, port=MQTT_BROKER_PORT)
-        self.game_mqtt_client.loop_start()
+        mqtt.enable_logger()
         self.game_mqtt_client.on_publish = self.on_publish
         self.game_mqtt_client.on_connect = self.on_connect
+        self.game_mqtt_client.loop_start()
 
         self._associated_to_game = False
         Clock.schedule_interval(self._poll_associated, 0.1)
@@ -200,8 +202,14 @@ class JoinScreen(Screen):
 
     def receive_associated_game(self, client, userdata, message):
         new_associated = json.loads(message.payload.decode('utf-8'))
+        Clock.schedule_once(lambda dt: self._update_game_state(new_associated), 0.01)
         print("-----------\n")
         print("received last asso. msg\n")
+
+    def _update_game_state(self, new_associated):
+        if self.game_updated:
+            return
+        
         if 'None' is not new_associated['player2']:
             self.msgs_player1 = new_associated['player1']
             self.msgs_player2 = new_associated['player2']
@@ -217,6 +225,8 @@ class JoinScreen(Screen):
             self._associated_to_game = False
             print("-----------\n")
             print("game waiting\n")
+
+        self.game_updated = True
     
     def on_device_associated_to_game(self, instance, value):
         if value:
