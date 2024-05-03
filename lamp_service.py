@@ -21,7 +21,7 @@ FP_DIGITS = 2
 MAX_STARTUP_WAIT_SECS = 10.0
 
 GAME_STATE_FILENAME = "game_state"
-
+TTT_MQTT_CLIENT_ID = "game_service"
 
 class InvalidLampConfig(Exception):
     pass
@@ -48,20 +48,20 @@ class LampDriver(object):
 #         self.db = shelve.open(GAME_STATE_FILENAME, writeback=True)
 
 #         if 'player_turn' not in self.db:
-#             self.db['player_turn'] = round(1.0, FP_DIGITS)
-#         if 'board_state' not in self.db:    #board state includes button positions
-#             self.db['board_state'] = 
-#         if 'game_code' not in self.db:
-#             self.db['game_code'] = ''
-#         self.write_current_settings_to_hardware()
+#             self.db['player_turn'] = "X"    #either X or O
+#         if 'game_state' not in self.db:    #board state includes button positions
+#             self.db['game_state'] = "[[0, 0, 0],[0, 0, 0],[0, 0, 0]]"
+#         # if 'game_code' not in self.db:
+#         #     self.db['game_code'] = ''
+#         self.write_current_game_state()
 
 #     def _create_and_configure_game_broker_client(self):
-#         client = mqtt.Client(client_id=MQTT_CLIENT_ID, protocol=MQTT_VERSION)
-#         client.will_set(client_state_topic(MQTT_CLIENT_ID), "0",
+#         client = mqtt.Client(client_id=TTT_MQTT_CLIENT_ID, protocol=MQTT_VERSION)
+#         client.will_set(client_state_topic(TTT_MQTT_CLIENT_ID), "0",
 #                         qos=2, retain=True)
 #         client.enable_logger()
 #         client.on_connect = self.on_connect
-#         client.message_callback_add(TOPIC_SET_LAMP_CONFIG,
+#         client.message_callback_add(TTT_TOPIC_SET_CONFIG,
 #                                     self.on_message_set_config)
 #         client.on_message = self.default_on_message
 #         return client
@@ -135,7 +135,7 @@ class LampDriver(object):
 #         if new_brightness < 0 or new_brightness > 1.0:
 #             raise InvalidLampConfig()
 #         self.db['brightness'] = round(new_brightness, FP_DIGITS)
-#         self.write_current_settings_to_hardware()
+#         self.write_current_game_state()
 
 #     def get_current_onoff(self):
 #         return self.db['on']
@@ -144,7 +144,7 @@ class LampDriver(object):
 #         if new_onoff not in [True, False]:
 #             raise InvalidLampConfig()
 #         self.db['on'] = new_onoff
-#         self.write_current_settings_to_hardware()
+#         self.write_current_game_state()
 
 #     def get_current_color(self):
 #         return self.db['color'].copy()
@@ -155,27 +155,12 @@ class LampDriver(object):
 #                 raise InvalidLampConfig()
 #         for ch in ['h', 's']:
 #             self.db['color'][ch] = round(new_color[ch], FP_DIGITS)
-#         self.write_current_settings_to_hardware()
+#         self.write_current_game_state()
 
-#     def write_current_settings_to_hardware(self):
-#         onoff = self.get_current_onoff()
-#         brightness = self.get_current_brightness()
-#         color = self.get_current_color()
-
-#         r, g, b = self.calculate_rgb(color['h'], color['s'], brightness, onoff)
-#         self.lamp_driver.change_color(r, g, b)
+#     def write_current_game_state(self):
+#         current_turn = self.get_current_turn()
+#         game_state = self.get_current_game_state()
 #         self.db.sync()
-
-#     def calculate_rgb(self, hue, saturation, brightness, is_on):
-#         pwm = float(PWM_RANGE)
-#         r, g, b = 0.0, 0.0, 0.0
-
-#         if is_on:
-#             rgb = colorsys.hsv_to_rgb(hue, saturation, 1.0)
-#             r, g, b = tuple(channel * pwm * brightness
-#                             for channel in rgb)
-#         return r, g, b
-
 
 class LampService(object):
     def __init__(self):
