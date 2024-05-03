@@ -60,19 +60,17 @@ class LampService(object):
         #  TTT inits
         self.game_db = shelve.open(GAME_STATE_FILENAME, writeback=True)
 
-        if 'client' not in self.db:
-            self.db['client'] = ''
-        if 'player1' not in self.db:
+        if 'player1' not in self.game_db:
             self.game_db['player1'] = 'None'
-        if 'player2' not in self.db:
+        if 'player2' not in self.game_db:
             self.game_db['player2'] = 'None'
-        if 'a_code' not in self.db:
+        if 'a_code' not in self.game_db:
             self.game_db['a_code'] = 'None'
-        if 'turn' not in self.db:
+        if 'turn' not in self.game_db:
             self.game_db['turn'] = 'None'
-        if 'board_state' not in self.db:    #board state includes button positions
+        if 'board_state' not in self.game_db:    #board state includes button positions
             self.game_db['board_state'] = ''
-        if 'game_state' not in self.db:
+        if 'game_state' not in self.game_db:
             self.game_db['game_state'] = 'None'
 
         self.write_current_settings_to_hardware()
@@ -121,6 +119,7 @@ class LampService(object):
         self._client.subscribe(TOPIC_SET_LAMP_CONFIG, qos=1)
         # publish current lamp state at startup
         self.publish_config_change()
+        self.publish_game_association_change()
 
         # TTT topic
         self._client.subscribe(TTT_TOPIC_SET_CONFIG, qos=1)
@@ -152,11 +151,11 @@ class LampService(object):
             if 'client' not in new_config:
                 raise InvalidLampConfig()
             if 'player1' in new_config:
-                self.set_current_onoff(new_config['player1'])
+                self.set_current_player1(new_config['player1'])
             if 'player2' in new_config:
-                self.set_current_onoff(new_config['player2'])
+                self.set_current_player2(new_config['player2'])
             if 'a_code' in new_config:
-                self.set_current_color(new_config['a_code'])
+                self.set_current_a_code(new_config['a_code'])
             self.publish_game_association_change()
         except InvalidLampConfig:
             print("error applying new settings " + str(msg.payload))

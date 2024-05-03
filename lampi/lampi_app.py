@@ -87,7 +87,7 @@ class StartScreen(Screen):
     def on_device_associated_to_game(self, instance, value):
         if value:
             self.create_popup.dismiss()
-            if msgs_player2 is not 'None':
+            if self.msgs_player2 is not 'None':
                 sm.current = 'game'
         else:
             self.create_popup.open()
@@ -168,6 +168,7 @@ class JoinScreen(Screen):
     msgs_player2 = 'None'
     game_association_code = ''
     game_started_flag = False
+    game_joined_flag = False
     device_associated_to_game = BooleanProperty(False)
     game_mqtt_client = Client(client_id=GAME_CLIENT_ID)
 
@@ -205,12 +206,26 @@ class JoinScreen(Screen):
         Clock.schedule_once(lambda dt: self._update_game_state(new_associated), 0.01)
         print("-----------\n")
         print("received last asso. msg\n")
+        print(new_associated)
 
     def _update_game_state(self, new_associated):
         if self.game_updated:
             return
         
-        if 'None' is not new_associated['player2']:
+        if str("None") == str(new_associated['player2']):
+            self.msgs_player1 = new_associated['player1']
+            self.game_association_code = new_associated['a_code']
+            self.game_started_flag = False
+            self._associated_to_game = False
+            print("-----------\n")
+            print("game waiting\n")
+            print(f"player2 type: {type(new_associated['player2'])}\n")
+            print(f"player1: {new_associated['player1']}\n")
+            print(f"player2: {new_associated['player2']}\n")
+            print(f"code: {new_associated['a_code']}\n")
+            print(new_associated)
+
+        else:
             self.msgs_player1 = new_associated['player1']
             self.msgs_player2 = new_associated['player2']
             self.game_association_code = new_associated['a_code']
@@ -218,20 +233,17 @@ class JoinScreen(Screen):
             self._associated_to_game = True
             print("-----------\n")
             print("game full\n")
-        else:
-            self.msgs_player1 = new_associated['player1']
-            self.game_association_code = new_associated['a_code']
-            self.game_started_flag = False
-            self._associated_to_game = False
-            print("-----------\n")
-            print("game waiting\n")
+            print(f"player1: {new_associated['player1']}\n")
+            print(f"player2: {new_associated['player2']}\n")
+            print(f"code: {new_associated['a_code']}\n")
 
         self.game_updated = True
     
     def on_device_associated_to_game(self, instance, value):
         if value:
-            sm.current = 'game'
-            print("connected")
+            if self.msgs_player2 is not "None" and self.game_joined_flag == True:
+                sm.current = 'game'
+                print(f"player2 from msg: {self.msgs_player2}")
 
     def btn_pressed(self, btn):
         self.try_association_code.append(self.btn_ids[str(btn)])
@@ -252,6 +264,7 @@ class JoinScreen(Screen):
                                 json.dumps(msg).encode('utf-8'),
                                 qos=1)
                 self._publish_clock = None
+                self.game_joined_flag = True
             else:
                 self.ids.error_text.text = f"Invalid! {self.game_association_code}."
                 self.try_association_code = []
