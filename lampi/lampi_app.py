@@ -297,6 +297,7 @@ class GameScreen(Screen):
             for col in range(3):
                 board_to_string = f"{board_to_string}{self.board_state[row][col]}"
         old_turn = self.turn
+        print(f"string board: {board_to_string}")
         
         msg = {'turn': self.next_turn,
                'board_state': board_to_string,
