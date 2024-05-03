@@ -257,8 +257,10 @@ class GameScreen(Screen):
     def receive_new_board_state(self, client, userdata, message):
         new_board_state = json.loads(message.payload.decode('utf-8'))
         self.turn = new_board_state["turn"]
-
-        decoded_board = json.loads(new_board_state["board_state"])
+        
+        decoded_board = [[0,0,0],[0,0,0],[0,0,0]]
+        for len in range(9):
+            decoded_board[int(len/3)][len%3] = f"{new_board_state[len]}"
         print(decoded_board)
         self.board_state = decoded_board
 
@@ -266,9 +268,13 @@ class GameScreen(Screen):
         print("Message published with mid:", mid)
 
     def publish_board_state(self):
-        # board_to_string = 
+        board_to_string = ""
+        for row in range(3):
+            for col in range(3):
+                board_to_string = f"{board_to_string}{self.board_state[row][col]}"
+        
         msg = {'turn': self.next_turn,
-               'board_state': self.board_state,
+               'board_state': board_to_string,
                'a_code': self.a_code,
                'client': GAME_CLIENT_ID}
         board_state_json = json.dumps(msg).encode('utf-8')
