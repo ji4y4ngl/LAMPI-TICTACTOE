@@ -268,11 +268,12 @@ class GameScreen(Screen):
         
     def receive_new_board_state(self, client, userdata, message):
         new_board_state = json.loads(message.payload.decode('utf-8'))
-        self.turn = new_board_state["turn"]
+        self.turn = new_board_state['turn']
         
         decoded_board = [[0,0,0],[0,0,0],[0,0,0]]
+        board_string = new_board_state['board_state']
         for index in range(9):
-            decoded_board[int(index/3)][index%3] = int(new_board_state['board_state'][index])
+            decoded_board[int(index/3)][index%3] = int(board_string[index])
         print(decoded_board)
         self.board_state = decoded_board
 
