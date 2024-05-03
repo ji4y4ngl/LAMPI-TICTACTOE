@@ -324,9 +324,9 @@ class GameScreen(Screen):
         # End The Game
     def end_game(self, a, b, c):
         self.winner = True
-        a.color = "red"
-        b.color = "red"
-        c.color = "red"
+        self.ids.a.color = "red"
+        self.ids.b.color = "red"
+        self.ids.c.color = "red"
 
         # Disable the buttons
         self.disable_all_buttons(True)
