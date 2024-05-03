@@ -45,7 +45,7 @@ class GameService(object):
         if 'turn' not in self.game_db:
             self.game_db['turn'] = 'None'
         if 'board_state' not in self.game_db:    #board state includes button positions
-            self.game_db['board_state'] = ''
+            self.game_db['board_state'] = "[[0, 0, 0], [0, 0, 0], [0, 0, 0]]"
         if 'game_state' not in self.game_db:
             self.game_db['game_state'] = 'None'
 

@@ -258,9 +258,7 @@ class GameScreen(Screen):
     winner = False
     X_win = 0
     O_win = 0
-    board_state = [[0, 0, 0],
-                  [0, 0, 0],
-                  [0, 0, 0]]
+    board_state = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
     
     #state variables for ttt game only
     game_on = False
@@ -292,12 +290,16 @@ class GameScreen(Screen):
     def receive_new_board_state(self, client, userdata, message):
         new_board_state = json.loads(message.payload.decode('utf-8'))
         self.turn = new_board_state["turn"]
-        self.board_state = new_board_state["board_state"]
+
+        decoded_board = json.loads(new_board_state["board_state"])
+        print(decoded_board)
+        self.board_state = decoded_board
 
     def on_publish(self, client, userdata, mid):
         print("Message published with mid:", mid)
 
     def publish_board_state(self):
+        # board_to_string = 
         msg = {'turn': self.next_turn,
                'board_state': self.board_state,
                'a_code': self.a_code,
