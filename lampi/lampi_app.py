@@ -23,6 +23,10 @@ mqtt = Client(client_id=MQTT_CLIENT_ID)
 players_turn = 'None'
 device_id = lampi.lampi_util.get_device_id()
 
+def create_game_code():
+    letters = ['x', 'y', 'a', 'b']
+    return ''.join(random.choice(letters) for i in range(3))
+
 class LampScreen(Screen):
     pass
 
@@ -50,12 +54,12 @@ class StartScreen(Screen):
         Clock.schedule_interval(self._poll_associated, 0.1)
 
     def on_connect(self, client, userdata, flags, rc):
-    # self.game_mqtt_client.message_callback_add(TTT_TOPIC_GAME_CHANGE,
-    #                                self.receive_new_game_state)
-    self.game_mqtt_client.message_callback_add(TTT_TOPIC_ASSOCIATE,
-                                    self.receive_associated_game)
-    # self.game_mqtt_client.subscribe(TTT_TOPIC_GAME_CHANGE, qos=1)
-    self.game_mqtt_client.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
+        # self.game_mqtt_client.message_callback_add(TTT_TOPIC_GAME_CHANGE,
+        #                                self.receive_new_game_state)
+        self.game_mqtt_client.message_callback_add(TTT_TOPIC_ASSOCIATE,
+                                        self.receive_associated_game)
+        # self.game_mqtt_client.subscribe(TTT_TOPIC_GAME_CHANGE, qos=1)
+        self.game_mqtt_client.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
 
     # def on_pre_enter(self):
 
