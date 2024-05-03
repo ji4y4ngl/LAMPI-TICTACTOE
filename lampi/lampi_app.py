@@ -274,8 +274,8 @@ class GameScreen(Screen):
         board_string = new_board_state['board_state']
         for index in range(9):
             decoded_board[int(index/3)][index%3] = int(board_string[index])
-        print(decoded_board)
         self.board_state = decoded_board
+        print(self.board_state)
 
     def on_publish(self, client, userdata, mid):
         print("Message published with mid:", mid)
