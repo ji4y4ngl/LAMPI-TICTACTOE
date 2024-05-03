@@ -15,7 +15,6 @@ PINS = [PIN_R, PIN_G, PIN_B]
 PWM_RANGE = 1000
 PWM_FREQUENCY = 1000
 
-GAME_STATE_FILENAME = "game_state"
 LAMP_STATE_FILENAME = "lamp_state"
 MQTT_CLIENT_ID = "lamp_service"
 FP_DIGITS = 2
@@ -57,22 +56,6 @@ class LampService(object):
         if 'client' not in self.db:
             self.db['client'] = ''
 
-        #  TTT inits
-        self.game_db = shelve.open(GAME_STATE_FILENAME, writeback=True)
-
-        if 'player1' not in self.game_db:
-            self.game_db['player1'] = 'None'
-        if 'player2' not in self.game_db:
-            self.game_db['player2'] = 'None'
-        if 'a_code' not in self.game_db:
-            self.game_db['a_code'] = 'None'
-        if 'turn' not in self.game_db:
-            self.game_db['turn'] = 'None'
-        if 'board_state' not in self.game_db:    #board state includes button positions
-            self.game_db['board_state'] = ''
-        if 'game_state' not in self.game_db:
-            self.game_db['game_state'] = 'None'
-
         self.write_current_settings_to_hardware()
 
     def _create_and_configure_broker_client(self):
@@ -84,12 +67,6 @@ class LampService(object):
         client.message_callback_add(TOPIC_SET_LAMP_CONFIG,
                                     self.on_message_set_config)
         client.on_message = self.default_on_message
-
-        # TTT TOPICS
-        client.message_callback_add(TTT_TOPIC_ASSOCIATE,
-                                    self.on_message_set_game_association)
-        client.message_callback_add(TTT_TOPIC_SET_CONFIG,
-                                    self.on_message_set_game_config)
         
         return client
 
@@ -119,12 +96,6 @@ class LampService(object):
         self._client.subscribe(TOPIC_SET_LAMP_CONFIG, qos=1)
         # publish current lamp state at startup
         self.publish_config_change()
-        self.set_last_client('lamp_service')
-        # self.publish_game_association_change()
-
-        # TTT topic
-        self._client.subscribe(TTT_TOPIC_SET_CONFIG, qos=1)
-        self.publish_game_config_change()
 
     def default_on_message(self, client, userdata, msg):
         print("Received unexpected message on topic " +
@@ -146,66 +117,12 @@ class LampService(object):
         except InvalidLampConfig:
             print("error applying new settings " + str(msg.payload))
 
-    def on_message_set_game_association(self, client, userdata, msg):
-        try:
-            new_config = json.loads(msg.payload.decode('utf-8'))
-            if 'client' not in new_config:
-                raise InvalidLampConfig()
-            if 'player1' in new_config:
-                self.set_current_player1(new_config['player1'])
-            if 'player2' in new_config:
-                self.set_current_player2(new_config['player2'])
-            if 'a_code' in new_config:
-                self.set_current_a_code(new_config['a_code'])
-            if 'client' in new_config:
-                self.set_last_client(new_config['client'])
-            print(f"client id rn: {new_config['client']}")
-            # if new_config['client'] is not "lamp_service":
-            self.publish_game_association_change()
-        except InvalidLampConfig:
-            print("error applying new settings " + str(msg.payload))
-
-    def on_message_set_game_config(self, client, userdata, msg):
-        try:
-            new_config = json.loads(msg.payload.decode('utf-8'))
-            if 'client' not in new_config:
-                raise InvalidLampConfig()
-            self.set_last_client(new_config['client'])
-            if 'on' in new_config:
-                self.set_current_onoff(new_config['on'])
-            if 'color' in new_config:
-                self.set_current_color(new_config['color'])
-            if 'brightness' in new_config:
-                self.set_current_brightness(new_config['brightness'])
-            self.publish_game_config_change()
-        except InvalidLampConfig:
-            print("error applying new settings " + str(msg.payload))
-
     def publish_config_change(self):
         config = {'color': self.get_current_color(),
                   'brightness': self.get_current_brightness(),
                   'on': self.get_current_onoff(),
                   'client': self.get_last_client()}
         self._client.publish(TOPIC_LAMP_CHANGE_NOTIFICATION,
-                             json.dumps(config).encode('utf-8'), qos=1,
-                             retain=True)
-    
-    def publish_game_association_change(self):
-        config = {'client': self.get_last_client(),
-                  'player1': self.get_current_player1(),
-                  'player2': self.get_current_player2(),
-                  'a_code': self.get_current_a_code()}
-        self._client.publish(TTT_TOPIC_ASSOCIATE,
-                             json.dumps(config).encode('utf-8'), qos=1,
-                             retain=True)
-
-    def publish_game_config_change(self):
-        config = {'client': self.get_last_client(),
-                  'turn': self.get_current_turn(),
-                  'board_state': self.get_current_board_state(),
-                  'game_state': self.get_current_game_state(),
-                  'a_code': self.get_current_a_code()}
-        self._client.publish(TTT_TOPIC_GAME_CHANGE,
                              json.dumps(config).encode('utf-8'), qos=1,
                              retain=True)
 
@@ -244,55 +161,6 @@ class LampService(object):
             self.db['color'][ch] = round(new_color[ch], FP_DIGITS)
         self.write_current_settings_to_hardware()
     
-    # TTT vars
-    def get_current_player1(self):
-        return self.game_db['player1']
-
-    def set_current_player1(self, new_player1):
-        if not isinstance(new_player1, str):
-            raise InvalidLampConfig()
-        self.game_db['player1'] = new_player1
-
-    def get_current_player2(self):
-        return self.game_db['player2']
-
-    def set_current_player2(self, new_player2):
-        if not isinstance(new_player2, str):
-            raise InvalidLampConfig()
-        self.game_db['player2'] = new_player2
-
-    def get_current_a_code(self):
-        return self.game_db['a_code']
-
-    def set_current_a_code(self, new_a_code):
-        if not isinstance(new_a_code, str):
-            raise InvalidLampConfig()
-        self.game_db['a_code'] = new_a_code
-
-    def get_current_turn(self):
-        return self.game_db['turn']
-
-    def set_current_turn(self, new_turn):
-        if not isinstance(new_turn, str):
-            raise InvalidLampConfig()
-        self.game_db['turn'] = new_turn
-
-    def get_current_board_state(self):
-        return self.game_db['board_state']
-
-    def set_current_board_state(self, new_board_state):
-        if not isinstance(new_board_state, str):
-            raise InvalidLampConfig()
-        self.game_db['board_state'] = new_board_state
-
-    def get_current_game_state(self):
-        return self.game_db['game_state']
-
-    def set_current_game_state(self, new_game_state):
-        if not isinstance(new_game_state, str):
-            raise InvalidLampConfig()
-        self.game_db['game_state'] = new_game_state
-
     def write_current_settings_to_hardware(self):
         onoff = self.get_current_onoff()
         brightness = self.get_current_brightness()
