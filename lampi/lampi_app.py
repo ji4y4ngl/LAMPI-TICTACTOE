@@ -243,7 +243,18 @@ class GameScreen(Screen):
         self.game_mqtt_client.message_callback_add(TTT_TOPIC_ASSOCIATE,
                                        self.receive_associated_game)
         self.game_mqtt_client.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
-        self.publish_board_state()
+
+        board_to_string = ""
+        for row in range(3):
+            for col in range(3):
+                board_to_string = f"{board_to_string}{self.board_state[row][col]}"
+        
+        msg = {'turn': "player1",
+               'board_state': board_to_string,
+               'a_code': self.a_code,
+               'client': GAME_CLIENT_ID}
+        board_state_json = json.dumps(msg).encode('utf-8')
+        self.game_mqtt_client.publish(TTT_TOPIC_SET_CONFIG, board_state_json, qos = 1, retain=True)
 
     def on_connect(self, client, userdata, flags, rc):
         self.game_mqtt_client.message_callback_add(TTT_TOPIC_GAME_CHANGE,
@@ -261,7 +272,7 @@ class GameScreen(Screen):
         
         decoded_board = [[0,0,0],[0,0,0],[0,0,0]]
         for index in range(9):
-            decoded_board[int(index/3)][index%3] = int(new_board_state[index])
+            decoded_board[int(index/3)][index%3] = int(new_board_state['board_state'][index])
         print(decoded_board)
         self.board_state = decoded_board
 
@@ -269,6 +280,7 @@ class GameScreen(Screen):
         print("Message published with mid:", mid)
 
     def publish_board_state(self):
+        print("------------\n")
         board_to_string = ""
         for row in range(3):
             for col in range(3):
@@ -281,7 +293,7 @@ class GameScreen(Screen):
         board_state_json = json.dumps(msg).encode('utf-8')
         self.game_mqtt_client.publish(TTT_TOPIC_SET_CONFIG, board_state_json, qos = 1, retain=True)
         self.next_turn = self.turn
-        print("new state published", board_state_json)
+        print("ew state published", board_state_json)
     
     def no_winner(self):
         if self.winner == False and all(all(cell != 0 for cell in row) for row in self.board_state):
