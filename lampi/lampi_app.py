@@ -324,9 +324,9 @@ class GameScreen(Screen):
         # End The Game
     def end_game(self, a, b, c):
         self.winner = True
-        self.ids.a.color = "red"
-        self.ids.b.color = "red"
-        self.ids.c.color = "red"
+        self.ids[a].color = "red"
+        self.ids[b].color = "red"
+        self.ids[c].color = "red"
 
         # Disable the buttons
         self.disable_all_buttons(True)
@@ -351,21 +351,18 @@ class GameScreen(Screen):
         for row in range(3):
             if self.board_state[row][0] == self.board_state[row][1] == self.board_state[row][2] != 0:
                 # If all cells in a row are equal and not empty, it's a win
-                # self.end_game(self.ids[f"btn{self.board_state[row][0]}"], self.ids[f"btn{self.board_state[row][1]}"], self.ids[f"btn{self.board_state[row][2]}"])
-                self.end_game(self.ids[f"btn{row * 3 + 1}"], self.ids[f"btn{row * 3 + 2}"], self.ids[f"btn{row * 3  + 3}"])
+                self.end_game(f"btn{row * 3 + 1}", f"btn{row * 3 + 2}", f"btn{row * 3  + 3}")
 
         for col in range(3):
             if self.board_state[0][col] == self.board_state[1][col] == self.board_state[2][col] != 0:
                 # If all cells in a column are equal and not empty, it's a win
-                self.end_game(self.ids[f"btn{0*3 + col+1}"], self.ids[f"btn{1*3 + col+1}"], self.ids[f"btn{2*3 + col+1}"])
+                self.end_game(f"btn{0*3 + col+1}", f"btn{1*3 + col+1}", f"btn{2*3 + col+1}")
 
         if self.board_state[0][0] != 0 and self.board_state[0][0] == self.board_state[1][1] == self.board_state[2][2]:
-            #self.end_game(self.ids[f"btn{self.board_state[0][0]}"], self.ids[f"btn{self.board_state[1][1]}"], self.ids[f"btn{self.board_state[2][2]}"])
-            self.end_game(self.ids[f"btn{0*3 + 0+1}"], self.ids[f"btn{1*3 + 1+1}"], self.ids[f"btn{2*3 + 2+1}"])
+            self.end_game(f"btn{0*3 + 0+1}", f"btn{1*3 + 1+1}", f"btn{2*3 + 2+1}")
         
         if self.board_state[0][2] != 0 and self.board_state[0][2] == self.board_state[1][1] == self.board_state[2][0]:
-            #self.end_game(self.ids[f"btn{self.board_state[0][2]}"], self.ids[f"btn{self.board_state[1][1]}"], self.ids[f"btn{self.board_state[2][0]}"])
-            self.end_game(self.ids[f"btn{0*3 + 2+1}"], self.ids[f"btn{1*3 + 1+1}"], self.ids[f"btn{2*3 + 0+1}"])
+            self.end_game(f"btn{0*3 + 2+1}", f"btn{1*3 + 1+1}", f"btn{2*3 + 0+1}")
         self.no_winner()
 
     def presser(self, btn):
