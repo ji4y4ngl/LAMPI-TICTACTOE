@@ -80,15 +80,11 @@ class StartScreen(Screen):
             self.msgs_player2 = new_associated['player2']
             self.msgs_a_code = new_associated['a_code']
             self._associated_to_game = True
-            print("arrived here")
-            print(f"player 2: {new_associated['player2']}")
-            print(f"correct code: {new_associated['a_code']}")
         else:
             self._associated_to_game = False
     
     def on_device_associated_to_game(self, instance, value):
         if value:
-            print("player 2 associated!")
             self.create_popup.dismiss()
             if self.msgs_player2 is not 'None':
                 sm.current = 'game'
@@ -243,8 +239,9 @@ class JoinScreen(Screen):
                 sm.current = 'game'
             else:
                 self.ids.error_text.text = f"Invalid! {self.game_association_code}."
-                self.try_association_code = []
-                self.ids.flavor_text.text = ''
+            
+            self.try_association_code = []
+            self.ids.flavor_text.text = ''
 
 class GameScreen(Screen):
     turn = "X"
@@ -387,7 +384,14 @@ class GameScreen(Screen):
 
     def exit_game(self):
         sm.current = 'start'
-        # refresh state ************************************
+        self.X_win = 0
+        self.O_win = 0
+        self.game_on = False
+        self.players_turn = 'n'
+        self.ids.game.text = f"X Wins: {self.X_win}  |  O Wins: {self.O_win}"
+        self.restart()
+        self.publish_game_state()
+
 
 # -----------------------------------------------------------------------------
 
