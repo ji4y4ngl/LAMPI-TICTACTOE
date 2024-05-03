@@ -124,12 +124,12 @@ class GameService(object):
             if 'client' not in new_config:
                 raise InvalidLampConfig()
             self.set_last_client(new_config['client'])
-            if 'on' in new_config:
-                self.set_current_onoff(new_config['on'])
-            if 'color' in new_config:
-                self.set_current_color(new_config['color'])
-            if 'brightness' in new_config:
-                self.set_current_brightness(new_config['brightness'])
+            if 'turn' in new_config:
+                self.set_current_turn(new_config['turn'])
+            if 'board_state' in new_config:
+                self.set_current_board_state(new_config['board_state'])
+            if 'a_code' in new_config:
+                self.set_current_a_code(new_config['a_code'])
             self.publish_game_config_change()
         except InvalidLampConfig:
             print("error applying new settings " + str(msg.payload))

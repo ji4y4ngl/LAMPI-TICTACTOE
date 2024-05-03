@@ -59,9 +59,9 @@ class StartScreen(Screen):
     def on_connect(self, client, userdata, flags, rc):
         # self.game_mqtt_client.message_callback_add(TTT_TOPIC_GAME_CHANGE,
         #                                self.receive_new_game_state)
+        # self.game_mqtt_client.subscribe(TTT_TOPIC_GAME_CHANGE, qos=1)
         self.game_mqtt_client.message_callback_add(TTT_TOPIC_ASSOCIATE,
                                        self.receive_associated_game)
-        # self.game_mqtt_client.subscribe(TTT_TOPIC_GAME_CHANGE, qos=1)
         self.game_mqtt_client.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
 
     def on_publish(self, client, userdata, mid):
@@ -193,6 +193,13 @@ class JoinScreen(Screen):
         #  Kivy UI
         self.device_associated_to_game = self._associated_to_game
 
+    def receive_new_game_state(self, client, userdata, message):
+        new_state = json.loads(message.payload.decode('utf-8'))
+        # Clock.schedule_once(lambda dt: self._update_game_state(new_state), 0.01)
+
+    def _update_game_state(self, new_state):
+        self.game_state = new_state
+
     def receive_associated_game(self, client, userdata, message):
         new_associated = json.loads(message.payload.decode('utf-8'))
         Clock.schedule_once(lambda dt: self._update_game_state(new_associated), 0.01)
@@ -244,11 +251,14 @@ class JoinScreen(Screen):
             self.ids.flavor_text.text = ''
 
 class GameScreen(Screen):
-    turn = "X"
+    mqtt_msg_players = {"player1":'None', "player2":'None'}
+    a_code = 'None'
+    turn = "player1"
+    next_turn = "player2"
     winner = False
     X_win = 0
     O_win = 0
-    game_state = [[0, 0, 0],
+    board_state = [[0, 0, 0],
                   [0, 0, 0],
                   [0, 0, 0]]
     
@@ -262,26 +272,43 @@ class GameScreen(Screen):
     def __init__(self, **kwargs):
         super(GameScreen, self).__init__(**kwargs)
         self.game_mqtt_client.connect(EC2_MQTT_BROKER_HOST, port=EC2_MQTT_BROKER_PORT)
+        self.game_mqtt_client.on_connect = self.on_connect
         self.game_mqtt_client.loop_start()
         self.game_mqtt_client.on_publish = self.on_publish
+        self.game_mqtt_client.message_callback_add(TTT_TOPIC_ASSOCIATE,
+                                       self.receive_associated_game)
+        self.game_mqtt_client.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
+
+    def on_connect(self, client, userdata, flags, rc):
+        self.game_mqtt_client.message_callback_add(TTT_TOPIC_GAME_CHANGE,
+                                       self.receive_new_board_state)
+        self.game_mqtt_client.subscribe(TTT_TOPIC_GAME_CHANGE, qos=1)
+
+    def receive_associated_game(self, client, userdata, message):
+        new_associated = json.loads(message.payload.decode('utf-8'))
+        self.mqtt_msg_players = {"player1":new_associated['player1'], "player2":new_associated['player2']}
+        self.a_code = new_associated['a_code']
         
+    def receive_new_board_state(self, client, userdata, message):
+        new_board_state = json.loads(message.payload.decode('utf-8'))
+        self.turn = new_board_state["turn"]
+        self.board_state = new_board_state["board_state"]
 
     def on_publish(self, client, userdata, mid):
         print("Message published with mid:", mid)
 
-    def publish_game_state(self):
-        msg = {'turn': self.turn,
-               'game_state': self.game_state,
+    def publish_board_state(self):
+        msg = {'turn': self.next_turn,
+               'board_state': self.board_state,
+               'a_code': self.a_code,
                'client': GAME_CLIENT_ID}
-        game_state_json = json.dumps(msg).encode('utf-8')
-        self.game_mqtt_client.publish(TTT_TOPIC_SET_CONFIG, game_state_json, qos = 1)
-        print("new state published", game_state_json)
-        
-    def receive_new_game_state(self, client, userdata, message):
-        new_game_state = json.loads(message.payload.decode('utf-8'))
+        board_state_json = json.dumps(msg).encode('utf-8')
+        self.game_mqtt_client.publish(TTT_TOPIC_SET_CONFIG, board_state_json, qos = 1)
+        self.next_turn = self.turn
+        print("new state published", board_state_json)
     
     def no_winner(self):
-        if self.winner == False and all(all(cell != 0 for cell in row) for row in self.game_state):
+        if self.winner == False and all(all(cell != 0 for cell in row) for row in self.board_state):
             self.ids.score.text = "IT'S A TIE!!"
 
         # End The Game
@@ -312,22 +339,22 @@ class GameScreen(Screen):
 
     def win(self):
         for row in range(3):
-            if self.game_state[row][0] == self.game_state[row][1] == self.game_state[row][2] != 0:
+            if self.board_state[row][0] == self.board_state[row][1] == self.board_state[row][2] != 0:
                 # If all cells in a row are equal and not empty, it's a win
-                # self.end_game(self.ids[f"btn{self.game_state[row][0]}"], self.ids[f"btn{self.game_state[row][1]}"], self.ids[f"btn{self.game_state[row][2]}"])
+                # self.end_game(self.ids[f"btn{self.board_state[row][0]}"], self.ids[f"btn{self.board_state[row][1]}"], self.ids[f"btn{self.board_state[row][2]}"])
                 self.end_game(self.ids[f"btn{row * 3 + 1}"], self.ids[f"btn{row * 3 + 2}"], self.ids[f"btn{row * 3  + 3}"])
 
         for col in range(3):
-            if self.game_state[0][col] == self.game_state[1][col] == self.game_state[2][col] != 0:
+            if self.board_state[0][col] == self.board_state[1][col] == self.board_state[2][col] != 0:
                 # If all cells in a column are equal and not empty, it's a win
                 self.end_game(self.ids[f"btn{0*3 + col+1}"], self.ids[f"btn{1*3 + col+1}"], self.ids[f"btn{2*3 + col+1}"])
 
-        if self.game_state[0][0] != 0 and self.game_state[0][0] == self.game_state[1][1] == self.game_state[2][2]:
-            #self.end_game(self.ids[f"btn{self.game_state[0][0]}"], self.ids[f"btn{self.game_state[1][1]}"], self.ids[f"btn{self.game_state[2][2]}"])
+        if self.board_state[0][0] != 0 and self.board_state[0][0] == self.board_state[1][1] == self.board_state[2][2]:
+            #self.end_game(self.ids[f"btn{self.board_state[0][0]}"], self.ids[f"btn{self.board_state[1][1]}"], self.ids[f"btn{self.board_state[2][2]}"])
             self.end_game(self.ids[f"btn{0*3 + 0+1}"], self.ids[f"btn{1*3 + 1+1}"], self.ids[f"btn{2*3 + 2+1}"])
         
-        if self.game_state[0][2] != 0 and self.game_state[0][2] == self.game_state[1][1] == self.game_state[2][0]:
-            #self.end_game(self.ids[f"btn{self.game_state[0][2]}"], self.ids[f"btn{self.game_state[1][1]}"], self.ids[f"btn{self.game_state[2][0]}"])
+        if self.board_state[0][2] != 0 and self.board_state[0][2] == self.board_state[1][1] == self.board_state[2][0]:
+            #self.end_game(self.ids[f"btn{self.board_state[0][2]}"], self.ids[f"btn{self.board_state[1][1]}"], self.ids[f"btn{self.board_state[2][0]}"])
             self.end_game(self.ids[f"btn{0*3 + 2+1}"], self.ids[f"btn{1*3 + 1+1}"], self.ids[f"btn{2*3 + 0+1}"])
         self.no_winner()
 
@@ -335,39 +362,39 @@ class GameScreen(Screen):
         # print(btn.numid)
         # print(type(btn.numid))
         if btn.text == "":
-            if self.turn == 'X':
-                btn.text = "X"
+            if self.turn == 'player1' and device_id == self.mqtt_msg_players['player1']:
+                btn.text = "X"  # sets tile to X
                 row = (int(btn.numid) - 1) // 3
                 col = (int(btn.numid) - 1) % 3
                 print("player1", row, col)
-                print('game state1', self.game_state)
-                self.game_state[row][col] = 1
-                self.publish_game_state()
-                print('game state2', self.game_state)
+                print('game state1', self.board_state)
+                self.board_state[row][col] = 1
+                self.publish_board_state()
+                print('game state2', self.board_state)
                 self.ids.score.text = "O's Turn!"
-                self.turn = "O"
-            else:
-                btn.text = "O"
+                self.turn = "player2"
+            elif self.turn == 'player2' and device_id == self.mqtt_msg_players['player2']:
+                btn.text = "O"  # sets tile to O
                 row = (int(btn.numid) - 1) // 3
                 col = (int(btn.numid) - 1) % 3
                 print("player2", row, col)
-                print('game state1', self.game_state)
-                self.game_state[row][col] = 2
-                self.publish_game_state()
-                print('game state2', self.game_state)
+                print('game state1', self.board_state)
+                self.board_state[row][col] = 2
+                self.publish_board_state()
+                print('game state2', self.board_state)
                 self.ids.score.text = "X's Turn!"
-                self.turn = "X"
+                self.turn = "player1"
 
         # Check To See if won
         self.win()
 
     def restart(self):
-        self.turn = "X"
+        self.turn = "player1"
         self.winner = False
-        self.game_state = [[0, 0, 0],
+        self.board_state = [[0, 0, 0],
                            [0, 0, 0],
                            [0, 0, 0]]
-        self.publish_game_state()
+        self.publish_board_state()
         # Enable The Buttons
         for row in range(3):
             for col in range(3):
@@ -390,7 +417,7 @@ class GameScreen(Screen):
         self.players_turn = 'n'
         self.ids.game.text = f"X Wins: {self.X_win}  |  O Wins: {self.O_win}"
         self.restart()
-        self.publish_game_state()
+        self.publish_board_state()
 
 
 # -----------------------------------------------------------------------------
