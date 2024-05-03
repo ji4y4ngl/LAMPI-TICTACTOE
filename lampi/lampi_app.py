@@ -279,7 +279,7 @@ class GameScreen(Screen):
                'a_code': self.a_code,
                'client': GAME_CLIENT_ID}
         board_state_json = json.dumps(msg).encode('utf-8')
-        self.game_mqtt_client.publish(TTT_TOPIC_SET_CONFIG, board_state_json, qos = 1)
+        self.game_mqtt_client.publish(TTT_TOPIC_SET_CONFIG, board_state_json, qos = 1, retain=True)
         self.next_turn = self.turn
         print("new state published", board_state_json)
     
