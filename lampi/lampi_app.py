@@ -37,9 +37,9 @@ class StartScreen(Screen):
     msgs_player1 = 'None'
     msgs_player2 = 'None'
     msgs_a_code = 'None'
-    # game_state = [[0, 0, 0],
-    #               [0, 0, 0],
-    #               [0, 0, 0]]
+    game_off = BooleanProperty(False)
+    gameScr = sm.get_screen('game')
+    game_off = not gameScr.game_on
     device_associated_to_game = BooleanProperty(False)
     game_mqtt_client = Client(client_id=GAME_CLIENT_ID)
 
@@ -88,6 +88,17 @@ class StartScreen(Screen):
             self.create_popup.dismiss()
             if self.msgs_player2 is not 'None':
                 sm.current = 'game'
+    
+    def on_game_off(self, instance, value):
+        if value:
+            msg = {'player1': 'None',
+                'player2': 'None',
+                'a_code': self.game_association_code,
+                'client': GAME_CLIENT_ID}
+            self.game_mqtt_client.publish(TTT_TOPIC_ASSOCIATE,
+                            json.dumps(msg).encode('utf-8'),
+                            qos=1, retain=True)
+            self._publish_clock = None
     
     def display_popup(self, btn):
         if self.ids.join == btn:
