@@ -36,10 +36,11 @@ class StartScreen(Screen):
     game_association_code = create_game_code()
     msgs_player1 = 'None'
     msgs_player2 = 'None'
+    msgs_a_code = 'None'
     # game_state = [[0, 0, 0],
     #               [0, 0, 0],
     #               [0, 0, 0]]
-    device_associated_to_game = BooleanProperty(True)
+    device_associated_to_game = BooleanProperty(False)
     game_mqtt_client = Client(client_id=GAME_CLIENT_ID)
 
     def __init__(self, **kwargs):
@@ -49,7 +50,7 @@ class StartScreen(Screen):
         self.game_mqtt_client.on_publish = self.on_publish
         self.game_mqtt_client.on_connect = self.on_connect
 
-        self._associated_to_game = True
+        self._associated_to_game = False
         Clock.schedule_interval(self._poll_associated, 0.1)
         
         self.create_popup = self._build_create_popup()
@@ -63,8 +64,6 @@ class StartScreen(Screen):
         # self.game_mqtt_client.subscribe(TTT_TOPIC_GAME_CHANGE, qos=1)
         self.game_mqtt_client.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
 
-    # def on_pre_enter(self):
-
     def on_publish(self, client, userdata, mid):
         print("Message published with mid:", mid)
     
@@ -76,26 +75,39 @@ class StartScreen(Screen):
 
     def receive_associated_game(self, client, userdata, message):
         new_associated = json.loads(message.payload.decode('utf-8'))
-        if 'None' is not new_associated['player2']:
+        if new_associated['player2'] != 'None' and new_associated['a_code'] == self.game_association_code:
             self.msgs_player1 = new_associated['player1']
             self.msgs_player2 = new_associated['player2']
-            self.game_association_code = new_associated['a_code']
+            self.msgs_a_code = new_associated['a_code']
             self._associated_to_game = True
+            print("arrived here")
+            print(f"player 2: {new_associated['player2']}")
+            print(f"correct code: {new_associated['a_code']}")
         else:
             self._associated_to_game = False
     
     def on_device_associated_to_game(self, instance, value):
         if value:
+            print("player 2 associated!")
             self.create_popup.dismiss()
             if self.msgs_player2 is not 'None':
                 sm.current = 'game'
-        else:
-            self.create_popup.open()
     
     def display_popup(self, btn):
         if self.ids.join == btn:
             sm.current = 'join'
         elif self.ids.create == btn:
+            code = self.game_association_code
+
+            msg = {'player1': device_id,
+                'player2': self.msgs_player2,
+                'a_code': self.game_association_code,
+                'client': GAME_CLIENT_ID}
+            self.game_mqtt_client.publish(TTT_TOPIC_ASSOCIATE,
+                            json.dumps(msg).encode('utf-8'),
+                            qos=1)
+            self._publish_clock = None
+
             self.create_popup.open()
 
     def on_create_popup(self, instance, value):
@@ -106,7 +118,6 @@ class StartScreen(Screen):
 
     def _build_create_popup(self):
         code = self.game_association_code
-        print(f"asso. code: {code}")
 
         return Popup(title='Game Association Code',
                      content=Label(text='Msg here',
@@ -115,16 +126,6 @@ class StartScreen(Screen):
 
     def update_create_popup(self, instance):
         code = self.game_association_code
-        print(f"asso. code: {code}")
-
-        msg = {'player1': device_id,
-            'player2': self.msgs_player2,
-            'a_code': self.game_association_code,
-            'client': GAME_CLIENT_ID}
-        self.game_mqtt_client.publish(TTT_TOPIC_ASSOCIATE,
-                        json.dumps(msg).encode('utf-8'),
-                        qos=1)
-        self._publish_clock = None
 
         instance.content.text = ("Association Code:\n"
                                  f"{code}\n"
@@ -174,23 +175,18 @@ class JoinScreen(Screen):
 
     def __init__(self, **kwargs):
         super(JoinScreen, self).__init__(**kwargs)
-        print("-----------\n")
-        print("initializing join\n")
         self.game_mqtt_client.connect(MQTT_BROKER_HOST, port=MQTT_BROKER_PORT)
-        mqtt.enable_logger()
         self.game_mqtt_client.on_publish = self.on_publish
         self.game_mqtt_client.on_connect = self.on_connect
         self.game_mqtt_client.loop_start()
 
         self._associated_to_game = False
-        Clock.schedule_interval(self._poll_associated, 0.1)
+        Clock.schedule_interval(self._poll_associated, 0.11)
         
     def on_publish(self, client, userdata, mid):
         print("Message published with mid:", mid)
 
     def on_connect(self, client, userdata, flags, rc):
-        print("-----------\n")
-        print("connecting\n")
         self.game_mqtt_client.message_callback_add(TTT_TOPIC_ASSOCIATE,
                                        self.receive_associated_game)
         self.game_mqtt_client.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
@@ -204,26 +200,13 @@ class JoinScreen(Screen):
     def receive_associated_game(self, client, userdata, message):
         new_associated = json.loads(message.payload.decode('utf-8'))
         Clock.schedule_once(lambda dt: self._update_game_state(new_associated), 0.01)
-        print("-----------\n")
-        print("received last asso. msg\n")
-        print(new_associated)
 
     def _update_game_state(self, new_associated):
-        if self.game_updated:
-            return
-        
         if str("None") == str(new_associated['player2']):
             self.msgs_player1 = new_associated['player1']
             self.game_association_code = new_associated['a_code']
             self.game_started_flag = False
             self._associated_to_game = False
-            print("-----------\n")
-            print("game waiting\n")
-            print(f"player2 type: {type(new_associated['player2'])}\n")
-            print(f"player1: {new_associated['player1']}\n")
-            print(f"player2: {new_associated['player2']}\n")
-            print(f"code: {new_associated['a_code']}\n")
-            print(new_associated)
 
         else:
             self.msgs_player1 = new_associated['player1']
@@ -231,19 +214,11 @@ class JoinScreen(Screen):
             self.game_association_code = new_associated['a_code']
             self.game_started_flag = True
             self._associated_to_game = True
-            print("-----------\n")
-            print("game full\n")
-            print(f"player1: {new_associated['player1']}\n")
-            print(f"player2: {new_associated['player2']}\n")
-            print(f"code: {new_associated['a_code']}\n")
-
-        self.game_updated = True
     
     def on_device_associated_to_game(self, instance, value):
         if value:
             if self.msgs_player2 is not "None" and self.game_joined_flag == True:
                 sm.current = 'game'
-                print(f"player2 from msg: {self.msgs_player2}")
 
     def btn_pressed(self, btn):
         self.try_association_code.append(self.btn_ids[str(btn)])
@@ -256,15 +231,16 @@ class JoinScreen(Screen):
             code = ''.join(self.try_association_code)
 
             if code == self.game_association_code:
-                msg = {'player1': msgs_player1,
-                    'player2': self.device_id,
+                msg = {'player1': self.msgs_player1,
+                    'player2': device_id,
                     'a_code': self.game_association_code,
                     'client': GAME_CLIENT_ID}
                 self.game_mqtt_client.publish(TTT_TOPIC_ASSOCIATE,
                                 json.dumps(msg).encode('utf-8'),
-                                qos=1)
+                                qos=1, retain=True)
                 self._publish_clock = None
                 self.game_joined_flag = True
+                sm.current = 'game'
             else:
                 self.ids.error_text.text = f"Invalid! {self.game_association_code}."
                 self.try_association_code = []
@@ -524,11 +500,8 @@ class LampiApp(App):
                                        self.receive_new_lamp_state)
         mqtt.message_callback_add(broker_bridge_connection_topic(),
                                        self.receive_bridge_connection_status)
-        mqtt.message_callback_add(TOPIC_LAMP_ASSOCIATED,
-                                       self.receive_associated)
         mqtt.subscribe(broker_bridge_connection_topic(), qos=1)
         mqtt.subscribe(TOPIC_LAMP_CHANGE_NOTIFICATION, qos=1)
-        mqtt.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
     
     def _poll_associated(self, dt):
         # this polling loop allows us to synchronize changes from the

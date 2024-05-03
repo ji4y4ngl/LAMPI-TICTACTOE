@@ -61,7 +61,7 @@ class LampService(object):
         self.game_db = shelve.open(GAME_STATE_FILENAME, writeback=True)
 
         if 'player1' not in self.game_db:
-            self.game_db['player1'] = 'test'
+            self.game_db['player1'] = 'None'
         if 'player2' not in self.game_db:
             self.game_db['player2'] = 'None'
         if 'a_code' not in self.game_db:
@@ -119,6 +119,7 @@ class LampService(object):
         self._client.subscribe(TOPIC_SET_LAMP_CONFIG, qos=1)
         # publish current lamp state at startup
         self.publish_config_change()
+        self.set_last_client('lamp_service')
         self.publish_game_association_change()
 
         # TTT topic
@@ -156,6 +157,10 @@ class LampService(object):
                 self.set_current_player2(new_config['player2'])
             if 'a_code' in new_config:
                 self.set_current_a_code(new_config['a_code'])
+            if 'client' in new_config:
+                self.set_last_client(new_config['client'])
+            print(f"client id rn: {new_config['client']}")
+            # if new_config['client'] is not "lamp_service":
             self.publish_game_association_change()
         except InvalidLampConfig:
             print("error applying new settings " + str(msg.payload))
