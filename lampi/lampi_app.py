@@ -280,10 +280,10 @@ class GameScreen(Screen):
 
         for row in range(3):
             for col in range(3):
-                btn_id = f"btn{row * 3 + col + 1}"
-                if board_string[row * 3 + col + 1] == 1:
+                btn_id = f"btn{row * 3 + col}"
+                if board_string[row * 3 + col] == 1:
                     self.ids[btn_id].text = "X"
-                if board_string[row * 3 + col + 1] == 2:
+                if board_string[row * 3 + col] == 2:
                     self.ids[btn_id].text = "O"
 
 
