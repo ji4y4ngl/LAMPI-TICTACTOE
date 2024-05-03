@@ -294,7 +294,7 @@ class GameScreen(Screen):
         board_state_json = json.dumps(msg).encode('utf-8')
         self.game_mqtt_client.publish(TTT_TOPIC_SET_CONFIG, board_state_json, qos = 1, retain=True)
         self.next_turn = self.turn
-        print("ew state published", board_state_json)
+        print("new state published", board_state_json)
     
     def no_winner(self):
         if self.winner == False and all(all(cell != 0 for cell in row) for row in self.board_state):
@@ -411,7 +411,7 @@ class GameScreen(Screen):
         
         msg = {'player1': 'None',
             'player2': 'None',
-            'a_code': self.game_association_code,
+            'a_code': self.a_code,
             'client': GAME_CLIENT_ID}
         self.game_mqtt_client.publish(TTT_TOPIC_ASSOCIATE,
                         json.dumps(msg).encode('utf-8'),
