@@ -243,6 +243,7 @@ class GameScreen(Screen):
         self.game_mqtt_client.message_callback_add(TTT_TOPIC_ASSOCIATE,
                                        self.receive_associated_game)
         self.game_mqtt_client.subscribe(TTT_TOPIC_ASSOCIATE, qos=1)
+        self.publish_board_state()
 
     def on_connect(self, client, userdata, flags, rc):
         self.game_mqtt_client.message_callback_add(TTT_TOPIC_GAME_CHANGE,
