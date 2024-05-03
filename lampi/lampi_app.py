@@ -86,17 +86,6 @@ class StartScreen(Screen):
             if self.msgs_player2 is not 'None':
                 sm.current = 'game'
     
-    # def on_game_off(self, instance, value):
-    #     if value:
-    #         msg = {'player1': 'None',
-    #             'player2': 'None',
-    #             'a_code': self.game_association_code,
-    #             'client': GAME_CLIENT_ID}
-    #         self.game_mqtt_client.publish(TTT_TOPIC_ASSOCIATE,
-    #                         json.dumps(msg).encode('utf-8'),
-    #                         qos=1, retain=True)
-    #         self._publish_clock = None
-    
     def display_popup(self, btn):
         if self.ids.join == btn:
             sm.current = 'join'
@@ -342,6 +331,9 @@ class GameScreen(Screen):
         # print(btn.numid)
         # print(type(btn.numid))
         if btn.text == "":
+            print(f"turn: {self.turn}")
+            print(f"player 1: {self.mqtt_msg_players['player1']}")
+            
             if self.turn == 'player1' and device_id == self.mqtt_msg_players['player1']:
                 btn.text = "X"  # sets tile to X
                 row = (int(btn.numid) - 1) // 3
