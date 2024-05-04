@@ -12,6 +12,7 @@ TTT_TOPIC_SET_CONFIG = "lamp/ttt/set_config"
 TTT_TOPIC_GAME_CHANGE = "lamp/ttt/changed"
 TTT_TOPIC_ASSOCIATE = "lamp/ttt/associate_game"
 
+
 def get_device_id():
     mac_addr = open(DEVICE_ID_FILENAME).read().strip()
     return mac_addr.replace(':', '')

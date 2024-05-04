@@ -22,9 +22,9 @@ FP_DIGITS = 2
 MAX_STARTUP_WAIT_SECS = 10.0
 
 
-
 class InvalidLampConfig(Exception):
     pass
+
 
 class GameService(object):
     def __init__(self):
@@ -44,7 +44,7 @@ class GameService(object):
             self.game_db['a_code'] = 'None'
         if 'turn' not in self.game_db:
             self.game_db['turn'] = 'None'
-        if 'board_state' not in self.game_db:    #board state includes button positions
+        if 'board_state' not in self.game_db:  # board state includes button positions
             self.game_db['board_state'] = "000000000"
         if 'game_state' not in self.game_db:
             self.game_db['game_state'] = 'None'
@@ -62,7 +62,7 @@ class GameService(object):
                                     self.on_message_set_game_association)
         client.message_callback_add(TTT_TOPIC_SET_CONFIG,
                                     self.on_message_set_game_config)
-        
+
         return client
 
     def serve(self):
@@ -90,7 +90,7 @@ class GameService(object):
                              qos=2, retain=True)
         self.set_last_client('game_service')
         self._client.message_callback_add(TTT_TOPIC_SET_CONFIG,
-                                    self.on_message_set_game_config)
+                                          self.on_message_set_game_config)
         self._client.subscribe(TTT_TOPIC_SET_CONFIG, qos=1)
 
     def default_on_message(self, client, userdata, msg):
@@ -131,7 +131,7 @@ class GameService(object):
             self.publish_game_config_change()
         except InvalidLampConfig:
             print("error applying new settings " + str(msg.payload))
-    
+
     def publish_game_association_change(self):
         config = {'client': self.get_last_client(),
                   'player1': self.get_current_player1(),
@@ -205,6 +205,7 @@ class GameService(object):
         if not isinstance(new_game_state, str):
             raise InvalidLampConfig()
         self.game_db['game_state'] = new_game_state
+
 
 if __name__ == '__main__':
     game = GameService().serve()

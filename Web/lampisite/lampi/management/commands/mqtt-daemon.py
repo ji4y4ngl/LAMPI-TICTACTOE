@@ -69,10 +69,10 @@ class Command(BaseCommand):
                 # record a new activation
                 self.mp.track(new_device.user.username,
                               "LAMPI Activation", {
-                                                   'event_type': 'activations',
-                                                   'interface': 'mqtt',
-                                                   'device_id': device_id
-                                                  }
+                                  'event_type': 'activations',
+                                  'interface': 'mqtt',
+                                  'device_id': device_id
+                              }
                               )
 
     def _monitor_broker_bridges(self, client, userdata, message):
@@ -91,11 +91,11 @@ class Command(BaseCommand):
             connection_state = 'Disconnected'
         self.mp.track('mqttbridge', "LAMPI {}".format(connection_state),
                       {
-                            'event_type': 'devicemonitoring',
-                            'interface': 'mqtt',
-                            'device_id': device_id
-                      }
-                      )
+            'event_type': 'devicemonitoring',
+            'interface': 'mqtt',
+            'device_id': device_id
+        }
+        )
 
     def _monitor_lamp_state(self, client, userdata, message):
         results = re.search(DEVICE_STATE_RE_PATTERN, message.topic.lower())

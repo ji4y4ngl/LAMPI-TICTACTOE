@@ -44,7 +44,7 @@ class Lampi(models.Model):
             retain=True,
             hostname="localhost",
             port=50001,
-            )
+        )
 
     def associate_and_publish_associated_msg(self,  user):
         # update Lampi instance with new user
@@ -60,4 +60,4 @@ class Lampi(models.Model):
             retain=True,
             hostname="localhost",
             port=50001,
-            )
+        )

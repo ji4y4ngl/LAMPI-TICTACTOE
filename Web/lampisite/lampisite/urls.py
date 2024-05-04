@@ -28,7 +28,7 @@ urlpatterns = [
          template_name='lampi/login.html',
          extra_context=extra_context), name='login'),
     path('logout/', auth_views.LogoutView.as_view(
-          template_name='lampi/logout.html',
+        template_name='lampi/logout.html',
          extra_context=extra_context), name='logout'),
     path('', RedirectView.as_view(pattern_name='lampi:index'), name='root'),
 ]

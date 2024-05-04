@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='lampi',
             name='device_id',
-            field=models.CharField(db_index=True, max_length=12, primary_key=True, serialize=False),
+            field=models.CharField(
+                db_index=True, max_length=12, primary_key=True, serialize=False),
         ),
     ]

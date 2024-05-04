@@ -21,7 +21,6 @@ FP_DIGITS = 2
 MAX_STARTUP_WAIT_SECS = 10.0
 
 
-
 class InvalidLampConfig(Exception):
     pass
 
@@ -40,6 +39,7 @@ class LampDriver(object):
         pins_values = zip(PINS, args)
         for pin, value in pins_values:
             self._gpio.set_PWM_dutycycle(pin, value)
+
 
 class LampService(object):
     def __init__(self):
@@ -67,7 +67,7 @@ class LampService(object):
         client.message_callback_add(TOPIC_SET_LAMP_CONFIG,
                                     self.on_message_set_config)
         client.on_message = self.default_on_message
-        
+
         return client
 
     def serve(self):
@@ -160,7 +160,7 @@ class LampService(object):
         for ch in ['h', 's']:
             self.db['color'][ch] = round(new_color[ch], FP_DIGITS)
         self.write_current_settings_to_hardware()
-    
+
     def write_current_settings_to_hardware(self):
         onoff = self.get_current_onoff()
         brightness = self.get_current_brightness()
