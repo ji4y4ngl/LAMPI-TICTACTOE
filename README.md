@@ -13,3 +13,4 @@ Tic Tac Toe game in Kivy UI and command line for Lampis.
    a. (1 device) Run the command line tool (directly on the Lampi or while ssh-ed into the Lampi): <br>
    &nbsp;&nbsp;&nbsp;&nbsp;<code>python3 toe_cmd.py</code> <br>
    b. (2 devices) Press the 2nd button to the right under the Lampis and play Tic Tac Toe on the LCDs
+7. Access Lampis at http://3.222.78.41:8080/lampi/
